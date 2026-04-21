@@ -13,6 +13,9 @@ La infraestructura Hextech proporciona una jaula de seguridad para trabajar con 
 - [Protocolo de Autonomía](docs/hextech/AUTONOMY_PROTOCOL.md) - Guía de seguridad con Auto-approve Edit activado.
 - [Flujo de Trabajo Cline](docs/hextech/CLINE_WORKFLOW.md) - Metodología para tareas (Plan Mode vs Act Mode).
 - [Presupuesto de Tokens](docs/hextech/TOKEN_BUDGET.md) - Optimización de contexto y uso eficiente de tokens.
+- [Blueprint de Arquitectura](docs/hextech/HEXTECH_BLUEPRINT.md) - Principios, fases y zonas del proyecto.
+- [Mapa Contextual](docs/hextech/CONTEXT_MAP.md) - Guía para navegar eficientemente y ahorrar tokens.
+- [Límites del Routing Neuron](docs/hextech/RN_BOUNDARY.md) - Reglas de protección para el subsistema crítico.
 
 ## Estructura del proyecto
 
