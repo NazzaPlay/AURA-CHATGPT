@@ -1,0 +1,85 @@
+{
+  "registry_version": "0.3",
+  "registry_type": "codex_control",
+  "active_model": "qwen3-coder",
+  "last_updated_at": "2026-04-15T02:27:06Z",
+  "canonical_registry_sync_status": "synchronized",
+  "control_modules": [
+    {
+      "module_id": "control_001",
+      "name": "task_scheduler",
+      "version": "0.3.0",
+      "status": "active",
+      "last_checked": "2026-04-15T02:27:06Z",
+      "dependencies": [
+        "ops/assistant_ops_registry.json",
+        "ops/task_queue.md",
+        "ops/execution_log.md"
+      ],
+      "configuration": {
+        "max_retries": 3,
+        "timeout_seconds": 300,
+        "retry_on_failure": true
+      }
+    },
+    {
+      "module_id": "control_002", 
+      "name": "registry_sync_handler",
+      "version": "0.3.0",
+      "status": "active",
+      "last_checked": "2026-04-15T02:27:06Z",
+      "dependencies": [
+        "backend/app/routing_neuron/admin/initializer.py",
+        "backend/app/routing_neuron/admin/init.py"
+      ],
+      "configuration": {
+        "sync_interval_seconds": 60,
+        "validate_checksums": true,
+        "require_manual_approval": false
+      }
+    },
+    {
+      "module_id": "control_003",
+      "name": "log_updater",
+      "version": "0.3.0",
+      "status": "active",
+      "last_checked": "2026-04-15T02:27:06Z",
+      "dependencies": [
+        "ops/execution_log.md"
+      ],
+      "configuration": {
+        "auto_truncate_logs": true,
+        "max_log_age_days": 30,
+        "enable_debug_logging": false
+      }
+    }
+  ],
+  "validation_rules": [
+    {
+      "rule_id": "vr_001",
+      "name": "task_id_consistency",
+      "description": "Ensure task IDs are consistent across queue, registry, and log",
+      "enabled": true,
+      "severity": "critical"
+    },
+    {
+      "rule_id": "vr_002", 
+      "name": "priority_sync",
+      "description": "Ensure priorities match between registry and queue",
+      "enabled": true,
+      "severity": "high"
+    },
+    {
+      "rule_id": "vr_003",
+      "name": "status_sync",
+      "description": "Ensure statuses match between registry and queue",
+      "enabled": true,
+      "severity": "high"
+    }
+  ],
+  "metadata": {
+    "created_by": "routing_neuron_codex",
+    "last_sync_with_canonical": "2026-04-15T02:27:06Z",
+    "sync_status": "synchronized"
+  }
+}
