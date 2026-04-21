@@ -1,0 +1,48 @@
+# Entornos virtuales
+.venv/
+venv/
+
+# Cachés de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Logs
+logs/
+*.log
+
+# Archivos de entorno
+.env
+.env.*
+!.env.example
+
+# Archivos de memoria y estado
+memory.json
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Outputs temporales
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# No ignorar código fuente
+!agents/
+!backend/
+!providers/
+!ops/
+!tests/
+!docs/

@@ -1,0 +1,31 @@
+# Reglas Hextech para Cline
+# =========================
+
+## Flujo de trabajo
+1. Siempre iniciar tareas con `git status`.
+2. Siempre terminar con `git diff --stat`.
+3. Una tarea = un objetivo claro.
+
+## Protección de RN
+4. No tocar RN (Routing Neuron) salvo que el prompt incluya exactamente: `RN_WRITE_ALLOWED`.
+5. No modificar archivos en backend/, agents/, providers/, ops/, tests/ salvo permiso explícito.
+
+## Seguridad de comandos
+6. No ejecutar comandos destructivos (git clean, git reset --hard, rm -rf, etc.).
+7. No instalar dependencias sin permiso explícito.
+8. No modificar más de 10 archivos por tarea sin permiso explícito.
+9. No mover carpetas completas sin plan aprobado.
+
+## Calidad y compatibilidad
+10. Preferir cambios pequeños y verificables.
+11. Mantener compatibilidad hacia atrás.
+12. Ejecutar tests cuando corresponda.
+
+## Gestión de contexto
+13. No usar navegador salvo permiso explícito.
+14. No tocar memory.json ni logs.
+15. Minimizar tokens: usar archivos concretos, evitar @workspace, resumir hallazgos.
+
+## Referencias
+16. Usar CONTEXT_MAP.md como mapa contextual cuando esté disponible.
+17. Dividir tareas grandes en subtareas.
