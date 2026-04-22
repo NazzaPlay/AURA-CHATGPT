@@ -164,11 +164,13 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 - `docs/` - Carpeta de documentación
 - `docs/hextech/` - Infraestructura Hextech
 - `README.md` - Documentación principal
+- `docs/hextech/PROJECT_INVENTORY.md` - Inventario técnico y mapa de riesgo
 
 **Cuándo leerlos**:
 - Cualquier tarea de documentación
 - Actualización de guías y protocolos
 - Verificación de reglas de seguridad
+- Análisis de estructura del proyecto y zonas de riesgo
 
 **Cuándo NO leerlos**:
 - Nunca (siempre es seguro leer documentación)
