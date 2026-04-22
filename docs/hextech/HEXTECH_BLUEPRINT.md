@@ -103,7 +103,7 @@ La arquitectura Hextech proporciona una jaula de seguridad y metodología para t
 
 ### Regla de Auto-approve
 - **Zonas seguras**: .gitignore, .clinerules, README.md, docs/hextech/
-- **Zonas peligrosas**: backend/, agents/, providers/, ops/, tests/, archivos .py funcionales
+- **Zonas peligrosas**: backend/, agents/, providers/, ops/, tests/, logs/, .venv/, __pycache__/, memory.json, archivos .py funcionales (main.py, config.py, aura.py, etc.)
 - **Verificación**: Siempre usar `git diff --stat` para confirmar cambios
 
 ## Flujo de Trabajo Hextech

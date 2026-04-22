@@ -23,7 +23,7 @@
 
 ## Gestión de contexto
 13. No usar navegador salvo permiso explícito.
-14. No tocar memory.json ni logs.
+14. No tocar memory.json, logs, .venv/, __pycache__/.
 15. Minimizar tokens: usar archivos concretos, evitar @workspace, resumir hallazgos.
 
 ## Referencias

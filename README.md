@@ -38,11 +38,16 @@ AURA/
 
 ## Reglas de seguridad
 
-1. **No modificar código funcional** sin permiso explícito.
+1. **No modificar código funcional** sin permiso explícito:
+   - `backend/`, `agents/`, `providers/`, `ops/`, `tests/`
+   - Archivos `.py` funcionales (main.py, config.py, aura.py, etc.)
+   - `memory.json`, `logs/`, `.venv/`, `__pycache__/`
 2. **No tocar RN** (Routing Neuron) salvo que el prompt incluya exactamente: `RN_WRITE_ALLOWED`.
 3. **Siempre** iniciar tareas con `git status`.
 4. **Siempre** terminar con `git diff --stat`.
 5. **Minimizar tokens**: usar archivos concretos, evitar @workspace, resumir hallazgos.
+6. **Zonas seguras** (modificables con Auto-approve Edit):
+   - `.gitignore`, `.clinerules`, `README.md`, `docs/hextech/`
 
 ## Inicio rápido
 
