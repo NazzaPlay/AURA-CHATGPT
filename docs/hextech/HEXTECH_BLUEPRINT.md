@@ -79,6 +79,7 @@ La arquitectura Hextech proporciona una jaula de seguridad y metodología para t
 - `backend/app/routing_neuron/` - Implementación de RN
 - `agents/routing_*.py` - Agentes de routing
 - `docs/routing_neuron_v1_checkpoint.md` - Checkpoint de referencia
+- **Evolución conceptual**: RN evoluciona hacia RN Family / Routing Neuron Mesh, una arquitectura modular de subsistemas especializados documentada en RN_FAMILY.md. RN Core V1.8 permanece como núcleo sellado protegido por RN_WRITE_ALLOWED.
 
 ### 7. Documentación
 - `docs/` - Documentación general

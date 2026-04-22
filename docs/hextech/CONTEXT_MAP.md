@@ -128,16 +128,22 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 - `backend/app/routing_neuron/` - Implementación de RN
 - `agents/routing_*.py` - Agentes de routing
 - `docs/routing_neuron_v1_checkpoint.md` - Checkpoint de referencia
+- `docs/hextech/RN_FAMILY.md` - Arquitectura modular conceptual RN Family / Routing Neuron Mesh
 
 **Cuándo leerlos**:
 - Solo lectura para auditoría
 - Análisis de imports y dependencias
 - Reporte de riesgos de seguridad
+- Entender arquitectura modular conceptual RN Family
 
 **Cuándo NO leerlos**:
 - Nunca modificar sin `RN_WRITE_ALLOWED`
 - Tareas de documentación general
 - Exploración casual del proyecto
+
+**Nota importante**: 
+- `RN_FAMILY.md` sirve para entender la arquitectura modular conceptual RN Family / Routing Neuron Mesh.
+- `RN_BOUNDARY.md` sigue siendo obligatorio antes de cualquier tarea que pueda tocar RN o componentes RN.
 
 **Riesgo de contexto**: Muy Alto (zona críticamente protegida)
 
@@ -165,6 +171,7 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 - `docs/hextech/` - Infraestructura Hextech
 - `README.md` - Documentación principal
 - `docs/hextech/PROJECT_INVENTORY.md` - Inventario técnico y mapa de riesgo
+- `docs/hextech/RN_FAMILY.md` - Arquitectura modular conceptual de RN Family
 
 **Cuándo leerlos**:
 - Cualquier tarea de documentación

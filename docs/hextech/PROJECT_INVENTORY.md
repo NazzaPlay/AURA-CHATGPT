@@ -78,6 +78,7 @@
   - `HEXTECH_BLUEPRINT.md` - Blueprint de arquitectura
   - `RN_BOUNDARY.md` - Límites del Routing Neuron
   - `PROJECT_INVENTORY.md` - Este documento
+  - `RN_FAMILY.md` - Arquitectura modular conceptual de RN Family
 - `docs/routing_neuron_v1_checkpoint.md` - Checkpoint de RN (solo lectura)
 
 ## RN (Routing Neuron) - Análisis de riesgo
@@ -86,6 +87,7 @@
 - **Versión**: V1.8 (subsistema canónico ya sellado)
 - **Ubicación canónica**: `backend/app/routing_neuron/`
 - **Documentación de referencia**: `docs/routing_neuron_v1_checkpoint.md` (legacy, solo lectura)
+- **Evolución conceptual**: RN Family / Routing Neuron Mesh es la arquitectura modular conceptual documentada en RN_FAMILY.md. Esta documentación no modifica RN Core V1.8 ni requiere RN_WRITE_ALLOWED, ya que es solo documentación conceptual.
 
 ### Archivos relacionados
 - `backend/app/routing_neuron/` - Implementación principal
