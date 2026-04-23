@@ -121,10 +121,16 @@ def _is_internal_command(normalized_input: str) -> bool:
     """Determinar si el input es un comando interno."""
     # Patrones de comandos internos
     command_patterns = [
+        # Patrones existentes
         r"^(que|muestra|mostra|haz|revisa|abre|valida|chequea)\s+(tools|herramientas|operaciones|capacidades|estado|memoria)",
         r"^(diagnostico|diagnóstico|chequeo|revision|revisión|resumen)",
         r"^(como estas|estas lista|estas listo|que tan lista|que tan listo)",
         r"^(que puedes hacer|como puedes ayudar|que conviene hacer)",
+        # Nuevos patrones contextuales (tool + contexto técnico)
+        r"(mostrame|dame|lista|enseñame)\s+(las\s+)?(tools|herramientas|capacidades|operaciones)",
+        r"(ejecutar|corre|correr|inicia)\s+(un\s+)?(diagnostico|diagnóstico|chequeo|revisión)",
+        r"(cual es|cuál es|decime|dime|dame)\s+(el\s+)?(estado|versión|version)",
+        r"^(dame|mostrame|muestra)\s+(el\s+)?(estado|versión|version)\s+(del\s+)?(sistema|sistema)",
     ]
     
     for pattern in command_patterns:
@@ -248,9 +254,13 @@ def _find_possible_matches(
     
     memory_question = analyze_memory_question(user_input)
     if memory_question:
+        # Verificar si el dato realmente existe en memoria
+        data_exists = _check_memory_data_exists(memory_question, memory)
+        confidence = 1.0 if data_exists else 0.3
         matches["memory_query"] = {
             "question": memory_question,
-            "confidence": 0.9 if not memory_question.is_ambiguous else 0.6
+            "confidence": confidence,
+            "data_exists": data_exists
         }
     
     if is_memory_update(user_input):
@@ -294,3 +304,28 @@ def _find_possible_matches(
         }
     
     return matches
+
+
+def _check_memory_data_exists(memory_question, memory: dict[str, Any]) -> bool:
+    """
+    Verificar si el dato solicitado en una consulta de memoria realmente existe.
+    
+    Args:
+        memory_question: Objeto MemoryQuestion de memory_agent
+        memory: Diccionario de memoria del usuario
+    
+    Returns:
+        True si el dato existe en memoria, False en caso contrario
+    """
+    # MemoryQuestion tiene atributo 'intent', no 'question_type'
+    intent = getattr(memory_question, 'intent', None)
+    
+    if intent == "name":
+        return bool(memory.get("name"))
+    elif intent == "work":
+        return bool(memory.get("work"))
+    elif intent == "likes":
+        return bool(memory.get("interests"))
+    
+    # Si no podemos determinar el tipo, asumir que no existe
+    return False

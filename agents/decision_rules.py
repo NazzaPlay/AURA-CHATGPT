@@ -185,6 +185,24 @@ def score_option(option: dict[str, Any], context: DecisionContext) -> float:
     if option["route"] == "model" and len(context.possible_matches) > 0:
         base_score *= 0.5
     
+    # Task type boost (multiplicador, no suma)
+    task_boost = 1.0
+    if context.task_type == TaskType.MEMORY and "memory" in option["route"]:
+        # Solo boost si hay datos reales en memoria
+        memory_match = context.possible_matches.get("memory_query", {})
+        if memory_match.get("data_exists", False):
+            task_boost = 1.5          # Memoria con datos → +50%
+        else:
+            task_boost = 0.8          # Memoria sin datos → penalizar
+    elif context.task_type == TaskType.COMMAND and option["route"] in (
+        "internal_tools", "maintenance", "system_state"
+    ):
+        task_boost = 1.5          # Comando + tool → +50%
+    elif context.task_type == TaskType.CONVERSATION and option["route"] == "model":
+        task_boost = 1.2          # Diálogo + modelo → +20%
+    
+    base_score *= task_boost
+    
     return round(base_score, 2)
 
 
