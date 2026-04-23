@@ -4,6 +4,8 @@
 
 RN Family / Routing Neuron Mesh es la evolución conceptual del Routing Neuron (RN) hacia una arquitectura modular de subsistemas especializados. Este documento describe la visión arquitectónica futura, **no una implementación actual**.
 
+**⚠️ IMPORTANTE**: Este documento es **documentación conceptual** sobre arquitectura futura. No modifica RN Core V1.8 ni requiere `RN_WRITE_ALLOWED`. Para reglas de seguridad RN, consulta [RN_BOUNDARY.md](RN_BOUNDARY.md) (única fuente de verdad).
+
 **Principios fundamentales:**
 - **RN Core V1.8** sigue siendo el núcleo sellado y protegido por `RN_WRITE_ALLOWED`
 - **RN Family** es la arquitectura modular conceptual construida alrededor del núcleo

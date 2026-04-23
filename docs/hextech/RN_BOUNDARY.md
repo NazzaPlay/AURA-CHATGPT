@@ -11,7 +11,9 @@ El Routing Neuron (RN) es el subsistema central de enrutamiento y toma de decisi
 
 RN está actualmente en **V1.8** y se considera un subsistema canónico ya sellado.
 
-**Nota conceptual**: RN evoluciona hacia RN Family / Routing Neuron Mesh, una arquitectura modular documentada en RN_FAMILY.md. Esta evolución es conceptual y no modifica RN Core V1.8, que sigue protegido por RN_WRITE_ALLOWED.
+**Nota conceptual**: RN evoluciona hacia RN Family / Routing Neuron Mesh, una arquitectura modular documentada en [RN_FAMILY.md](RN_FAMILY.md). Esta evolución es conceptual y no modifica RN Core V1.8, que sigue protegido por RN_WRITE_ALLOWED.
+
+**⚠️ IMPORTANTE**: Este documento (**RN_BOUNDARY.md**) es la **única fuente de verdad para seguridad RN**. Todas las reglas de protección RN definidas aquí tienen precedencia sobre cualquier otra mención en otros documentos.
 
 ## Carpetas y Archivos Relacionados
 

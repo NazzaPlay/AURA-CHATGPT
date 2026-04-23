@@ -23,9 +23,10 @@ La arquitectura Hextech proporciona una jaula de seguridad y metodología para t
 - **Commit condicional**: Solo si cambios son correctos y limitados a zonas seguras
 
 ### 4. RN Protegido
-- **Regla absoluta**: No modificar Routing Neuron sin `RN_WRITE_ALLOWED` en el prompt
+- **Regla absoluta**: Consulta [RN_BOUNDARY.md](RN_BOUNDARY.md) para las reglas completas de protección RN
 - **Referencia sensible**: `docs/routing_neuron_v1_checkpoint.md` es solo lectura
 - **Auditoría permitida**: Leer, analizar imports, reportar riesgos
+- **⚠️ NOTA**: Este documento NO define reglas de seguridad RN. La única fuente de verdad para seguridad RN es [RN_BOUNDARY.md](RN_BOUNDARY.md).
 
 ### 5. Cambios Pequeños y Verificables
 - Una tarea = un objetivo claro
@@ -43,7 +44,7 @@ La arquitectura Hextech proporciona una jaula de seguridad y metodología para t
 - Creación de documentación Hextech
 - Definición de protocolos de seguridad
 - Establecimiento de flujos de trabajo controlados
-- **Esta fase incluye**: AUTONOMY_PROTOCOL.md, CLINE_WORKFLOW.md, TOKEN_BUDGET.md, HEXTECH_BLUEPRINT.md, CONTEXT_MAP.md, RN_BOUNDARY.md
+- **Esta fase incluye**: AUTONOMY_PROTOCOL.md, CLINE_WORKFLOW.md *(no implementado aún)*, TOKEN_BUDGET.md *(no implementado aún)*, HEXTECH_BLUEPRINT.md, CONTEXT_MAP.md, RN_BOUNDARY.md
 
 ### H2: Reorganización Controlada
 - Reestructuración de carpetas solo con plan aprobado

@@ -183,6 +183,11 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 - Nunca (siempre es seguro leer documentación)
 - **Nota**: Modificar solo con Auto-approve Edit activado
 
+**Diferenciación clave**:
+- **Este documento (CONTEXT_MAP.md)**: Guía de navegación eficiente
+- **PROJECT_INVENTORY.md**: Inventario técnico y análisis de riesgo
+- **RN_BOUNDARY.md**: Única fuente de verdad para seguridad RN
+
 **Riesgo de contexto**: Bajo (zona segura)
 
 ### 10. Git/Checkpoints

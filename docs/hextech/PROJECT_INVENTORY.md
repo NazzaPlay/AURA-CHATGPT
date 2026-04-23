@@ -99,6 +99,8 @@
 - `agents/routing_scorer.py` - Puntuación de routing
 
 ### Reglas de protección absoluta
+**⚠️ IMPORTANTE**: Para las reglas completas de protección RN, consulta [RN_BOUNDARY.md](RN_BOUNDARY.md) (única fuente de verdad para seguridad RN).
+
 1. **NO MODIFICAR RN** salvo que el prompt incluya exactamente: `RN_WRITE_ALLOWED`
 2. **Solo lectura permitida** para auditoría y análisis
 3. **Nunca modificar** schemas, registry, control o runtime de RN sin permiso

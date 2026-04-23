@@ -18,6 +18,8 @@ Autonomía controlada significa que Cline tiene capacidad de modificar solo arch
 
 La autonomía está limitada a "zonas seguras" definidas explícitamente.
 
+**Nota importante**: Este documento es **explicativo** (filosofía de autonomía). Para las reglas ejecutables que Cline debe seguir, consulta [`.clinerules`](../.clinerules).
+
 ## Zonas seguras y zonas peligrosas
 
 ### Zonas seguras (modificables)
