@@ -22,6 +22,7 @@ from .capabilities_registry import (
 )
 from .capability_dispatcher import DispatchResult, dispatch
 from .chat_agent import UserTurn, process_user_input
+from .decision_engine import DecisionAnalysis, analyze_decision
 from .memory_agent import remember_basic_memory
 from .router_agent import (
     ROUTE_CAPABILITIES,
@@ -919,11 +920,26 @@ def prepare_turn(
     if user_turn.is_empty:
         return None
 
-    route_decision = route_turn(
-        user_turn,
+    # NUEVO: Usar decision engine para analizar y decidir ruta
+    decision_analysis = analyze_decision(
+        user_turn.raw,
         conversation=conversation,
         memory=memory,
     )
+    
+    # Construir RouteDecision basado en el análisis
+    route_decision = RouteDecision(
+        action=decision_analysis.selected_route,
+        capability=decision_analysis.selected_capability,
+        # Los campos adicionales se llenarán según la ruta seleccionada
+        memory_intent=None,
+        operations_query=None,
+        tools_query=None,
+        internal_command=None,
+        maintenance_command=None,
+        system_state_command=None,
+    )
+    
     intent = _resolve_intent_for_route(
         classify_user_intent(user_turn.raw),
         route_decision.action,

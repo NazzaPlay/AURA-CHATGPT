@@ -198,6 +198,24 @@ from .core_agent import (
     execute_turn,
     prepare_turn,
 )
+from .decision_engine import (
+    DecisionAnalysis,
+    analyze_decision,
+    get_decision_history,
+    get_decision_stats,
+    clear_decision_history,
+    should_use_model_directly,
+    get_recommended_fallback_chain,
+)
+from .decision_context import DecisionContext, TaskType
+from .decision_rules import (
+    evaluate_options,
+    score_option,
+    select_best_option,
+    should_retry_decision,
+    MIN_SCORE_THRESHOLD,
+    MAX_DECISION_ATTEMPTS,
+)
 from .internal_commands_agent import (
     INTERNAL_ACTION_FORGET,
     INTERNAL_ACTION_QUERY,
@@ -391,6 +409,9 @@ __all__ = [
     "MEMORY_INTENT_LIKES",
     "MEMORY_INTENT_NAME",
     "MEMORY_INTENT_WORK",
+    "DecisionAnalysis",
+    "DecisionContext",
+    "TaskType",
     "BehaviorPlan",
     "CapabilitiesQuery",
     "CapabilityContext",
@@ -416,6 +437,18 @@ __all__ = [
     "TurnPlan",
     "TurnResult",
     "UserTurn",
+    "analyze_decision",
+    "get_decision_history",
+    "get_decision_stats",
+    "clear_decision_history",
+    "should_use_model_directly",
+    "get_recommended_fallback_chain",
+    "evaluate_options",
+    "score_option",
+    "select_best_option",
+    "should_retry_decision",
+    "MIN_SCORE_THRESHOLD",
+    "MAX_DECISION_ATTEMPTS",
     "build_memory_context",
     "build_memory_response",
     "build_memory_update_response",
