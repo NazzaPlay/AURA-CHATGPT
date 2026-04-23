@@ -326,6 +326,8 @@ def _check_memory_data_exists(memory_question, memory: dict[str, Any]) -> bool:
         return bool(memory.get("work"))
     elif intent == "likes":
         return bool(memory.get("interests"))
+    elif intent == "preferences":
+        return bool(memory.get("preferences"))
     
     # Si no podemos determinar el tipo, asumir que no existe
     return False

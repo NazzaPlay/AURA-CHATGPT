@@ -9,6 +9,7 @@ from .text_matching import normalize_internal_text
 MEMORY_INTENT_NAME = "name"
 MEMORY_INTENT_WORK = "work"
 MEMORY_INTENT_LIKES = "likes"
+MEMORY_INTENT_PREFERENCES = "preferences"
 QUESTION_PREFIXES = (
     "que ",
     "como ",
@@ -24,6 +25,8 @@ EXACT_WORK_QUESTIONS = {
     "en que trabajo",
     "de que trabajo",
     "cual es mi trabajo",
+    "que trabajo tengo",
+    "que trabajo hago",
 }
 EXACT_LIKES_QUESTIONS = {
     "que me gusta",
@@ -47,7 +50,9 @@ KNOWN_PREFERENCE_CORRECTIONS = {
 NAME_PATTERN = re.compile(r"\bme llamo\s+(.+)", re.IGNORECASE)
 ASK_NAME_PATTERN = re.compile(r"\bc[oó]mo me llamo\b", re.IGNORECASE)
 ASK_WORK_PATTERN = re.compile(
-    r"\ben\s+qu[eé]\s+trabajo\b|\bde\s+qu[eé]\s+trabajo\b|\bcu[aá]l\s+es\s+mi\s+trabajo\b",
+    r"\ben\s+qu[eé]\s+trabajo\b|\bde\s+qu[eé]\s+trabajo\b"
+    r"|\bcu[aá]l\s+es\s+mi\s+trabajo\b"
+    r"|\bqu[eé]\s+trabajo\s+(?:tengo|hago)\b",
     re.IGNORECASE,
 )
 ASK_LIKES_PATTERN = re.compile(
@@ -67,6 +72,11 @@ INTEREST_PATTERNS = (
 PREFERENCE_PATTERN = re.compile(r"\bprefiero\s+(.+)", re.IGNORECASE)
 FAVORITE_PATTERN = re.compile(
     r"\bmi\s+(.+?)\s+favorit[oa]\s+es\s+(.+)",
+    re.IGNORECASE,
+)
+ASK_FAVORITE_PATTERN = re.compile(
+    r"\bcu[aá]l\s+es\s+mi\s+(.+?)\s+favorit[oa]\b"
+    r"|\b(?:decime|dime)\s+mi\s+(.+?)\s+favorit[oa]\b",
     re.IGNORECASE,
 )
 NAME_STOP_WORDS = {"y", "pero", "porque", "soy", "tengo", "vivo", "trabajo", "mi"}
@@ -329,6 +339,12 @@ def analyze_memory_question(user_input: str) -> MemoryQuestion | None:
             is_ambiguous=normalized_input not in EXACT_LIKES_QUESTIONS,
         )
 
+    if is_preference_question(user_input):
+        return MemoryQuestion(
+            intent=MEMORY_INTENT_PREFERENCES,
+            is_ambiguous=False,
+        )
+
     return None
 
 
@@ -406,6 +422,10 @@ def is_work_question(user_input: str) -> bool:
 
 def is_likes_question(user_input: str) -> bool:
     return bool(ASK_LIKES_PATTERN.search(user_input))
+
+
+def is_preference_question(user_input: str) -> bool:
+    return bool(ASK_FAVORITE_PATTERN.search(user_input))
 
 
 def get_memory_question_type(user_input: str) -> str | None:
@@ -538,6 +558,13 @@ def build_likes_response(memory: dict[str, Any]) -> str:
     return "Todavía no tengo gustos tuyos guardados."
 
 
+def build_preferences_response(memory: dict[str, Any]) -> str:
+    if memory.get("preferences"):
+        return f"Tus preferencias guardadas son: {_format_items(memory['preferences'])}."
+
+    return "Todavía no tengo preferencias tuyas guardadas."
+
+
 def build_memory_response(memory: dict[str, Any], memory_intent: str | None) -> str:
     if memory_intent == MEMORY_INTENT_NAME:
         return build_name_response(memory)
@@ -547,6 +574,9 @@ def build_memory_response(memory: dict[str, Any], memory_intent: str | None) -> 
 
     if memory_intent == MEMORY_INTENT_LIKES:
         return build_likes_response(memory)
+
+    if memory_intent == MEMORY_INTENT_PREFERENCES:
+        return build_preferences_response(memory)
 
     return "[sin respuesta]"
 
@@ -578,6 +608,15 @@ def build_ambiguous_memory_response(
             )
 
         return "No tengo guardado con precisión qué te gusta hacer."
+
+    if memory_intent == MEMORY_INTENT_PREFERENCES:
+        if memory.get("preferences"):
+            return (
+                f"Tengo guardado que tus preferencias son {_format_items(memory['preferences'])}, "
+                "pero no sé específicamente cuál consultas."
+            )
+
+        return "No tengo guardado con precisión tus preferencias."
 
     return "No tengo suficiente memoria para responder eso con precisión."
 
