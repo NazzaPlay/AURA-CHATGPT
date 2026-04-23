@@ -920,24 +920,51 @@ def prepare_turn(
     if user_turn.is_empty:
         return None
 
-    # NUEVO: Usar decision engine para analizar y decidir ruta
+    # 1. Decision Engine: analiza y determina la ruta óptima
     decision_analysis = analyze_decision(
         user_turn.raw,
         conversation=conversation,
         memory=memory,
     )
     
-    # Construir RouteDecision basado en el análisis
+    # 2. route_turn: obtiene RouteDecision completo con contextos de ejecución
+    full_route = route_turn(user_turn, conversation, memory)
+    selected_route = decision_analysis.selected_route
+    
+    # 3. Construir RouteDecision: ruta del Engine + contextos filtrados de route_turn
     route_decision = RouteDecision(
-        action=decision_analysis.selected_route,
+        action=selected_route,
         capability=decision_analysis.selected_capability,
-        # Los campos adicionales se llenarán según la ruta seleccionada
-        memory_intent=None,
-        operations_query=None,
-        tools_query=None,
-        internal_command=None,
-        maintenance_command=None,
-        system_state_command=None,
+        memory_intent=(
+            full_route.memory_intent
+            if selected_route in ("memory_lookup", "memory_lookup_ambiguous")
+            else None
+        ),
+        operations_query=(
+            full_route.operations_query
+            if selected_route == "operations"
+            else None
+        ),
+        tools_query=(
+            full_route.tools_query
+            if selected_route in ("internal_tools", "capabilities")
+            else None
+        ),
+        internal_command=(
+            full_route.internal_command
+            if selected_route in ("internal_query", "internal_forget")
+            else None
+        ),
+        maintenance_command=(
+            full_route.maintenance_command
+            if selected_route == "maintenance"
+            else None
+        ),
+        system_state_command=(
+            full_route.system_state_command
+            if selected_route == "system_state"
+            else None
+        ),
     )
     
     intent = _resolve_intent_for_route(
