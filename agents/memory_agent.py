@@ -142,7 +142,7 @@ def _normalize_match_text(text: str) -> str:
 
 
 def _trim_punctuation(candidate: str) -> str:
-    return re.split(r"[.!?;:]", candidate, maxsplit=1)[0].strip(" ¿?¡!")
+    return re.split(r"[.!?;]", candidate, maxsplit=1)[0].strip(" ¿?¡!")
 
 
 def _truncate_clause(candidate: str) -> str:
