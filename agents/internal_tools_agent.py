@@ -67,6 +67,12 @@ TOOLS_CATALOG_QUERY_COMMANDS = build_normalized_command_family(
 TOOLS_DIAGNOSTIC_QUERY_COMMANDS = normalize_command_variants(
     {
         "haz un diagnostico interno",
+        "ejecutar diagnostico",
+        "ejecutar un diagnostico",
+        "correr diagnostico",
+        "correr un diagnostico",
+        "hacer diagnostico",
+        "hacer un diagnostico",
     }
 )
 TOOLS_GENERAL_DIAGNOSTIC_QUERY_COMMANDS = normalize_command_variants(
