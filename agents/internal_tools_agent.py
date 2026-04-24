@@ -56,6 +56,12 @@ TOOLS_CATALOG_QUERY_COMMANDS = build_normalized_command_family(
         "muestrame tus herramientas internas",
         "mostra tus herramientas internas",
         "mostrame tus herramientas internas",
+        "mostrame las tools disponibles",
+        "muestrame las tools disponibles",
+        "mostra las tools disponibles",
+        "muestra las tools disponibles",
+        "mostrame las herramientas disponibles",
+        "muestrame las herramientas disponibles",
     }
 )
 TOOLS_DIAGNOSTIC_QUERY_COMMANDS = normalize_command_variants(

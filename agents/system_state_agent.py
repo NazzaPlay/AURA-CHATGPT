@@ -148,6 +148,14 @@ STATE_QUERY_COMMANDS = normalize_command_variants(
         "muestrame tu estado",
         "mostra tu estado",
         "mostrame tu estado",
+        "dame el estado del sistema",
+        "dame el estado",
+        "mostrame el estado del sistema",
+        "mostrame el estado",
+        "muestrame el estado del sistema",
+        "muestrame el estado",
+        "mostra el estado del sistema",
+        "mostra el estado",
     }
 )
 MODEL_NAME_QUERY_COMMANDS = normalize_command_variants(

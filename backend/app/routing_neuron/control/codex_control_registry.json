@@ -1,85 +1,73 @@
 {
   "registry_version": "0.3",
-  "registry_type": "codex_control",
-  "active_model": "qwen3-coder",
-  "last_updated_at": "2026-04-15T02:27:06Z",
-  "canonical_registry_sync_status": "synchronized",
-  "control_modules": [
-    {
-      "module_id": "control_001",
-      "name": "task_scheduler",
-      "version": "0.3.0",
-      "status": "active",
-      "last_checked": "2026-04-15T02:27:06Z",
-      "dependencies": [
-        "ops/assistant_ops_registry.json",
-        "ops/task_queue.md",
-        "ops/execution_log.md"
-      ],
-      "configuration": {
-        "max_retries": 3,
-        "timeout_seconds": 300,
-        "retry_on_failure": true
-      }
-    },
-    {
-      "module_id": "control_002", 
-      "name": "registry_sync_handler",
-      "version": "0.3.0",
-      "status": "active",
-      "last_checked": "2026-04-15T02:27:06Z",
-      "dependencies": [
-        "backend/app/routing_neuron/admin/initializer.py",
-        "backend/app/routing_neuron/admin/init.py"
-      ],
-      "configuration": {
-        "sync_interval_seconds": 60,
-        "validate_checksums": true,
-        "require_manual_approval": false
-      }
-    },
-    {
-      "module_id": "control_003",
-      "name": "log_updater",
-      "version": "0.3.0",
-      "status": "active",
-      "last_checked": "2026-04-15T02:27:06Z",
-      "dependencies": [
-        "ops/execution_log.md"
-      ],
-      "configuration": {
-        "auto_truncate_logs": true,
-        "max_log_age_days": 30,
-        "enable_debug_logging": false
-      }
-    }
-  ],
-  "validation_rules": [
-    {
-      "rule_id": "vr_001",
-      "name": "task_id_consistency",
-      "description": "Ensure task IDs are consistent across queue, registry, and log",
-      "enabled": true,
-      "severity": "critical"
-    },
-    {
-      "rule_id": "vr_002", 
-      "name": "priority_sync",
-      "description": "Ensure priorities match between registry and queue",
-      "enabled": true,
-      "severity": "high"
-    },
-    {
-      "rule_id": "vr_003",
-      "name": "status_sync",
-      "description": "Ensure statuses match between registry and queue",
-      "enabled": true,
-      "severity": "high"
-    }
-  ],
-  "metadata": {
-    "created_by": "routing_neuron_codex",
-    "last_sync_with_canonical": "2026-04-15T02:27:06Z",
-    "sync_status": "synchronized"
-  }
+  "schema_version": "codex_control_registry.v1.3",
+  "latest_version": null,
+  "latest_status": "empty",
+  "latest_checkpoint": null,
+  "latest_checkpoint_short": null,
+  "latest_runtime_health": "empty",
+  "latest_test_health": "not_run",
+  "latest_risk": "unknown",
+  "latest_open_debts": [],
+  "latest_next_step": null,
+  "latest_version_closed_for_scope": null,
+  "latest_handoff": null,
+  "latest_review_minimal": null,
+  "latest_known_good": null,
+  "latest_known_weakness": null,
+  "latest_review_artifacts_needed": [],
+  "latest": {
+    "run_id": null,
+    "timestamp": null,
+    "version_target": null,
+    "status": "empty",
+    "work_type": null,
+    "requested_scope": null,
+    "summary": null,
+    "checkpoint_short": null,
+    "checkpoint_long": null,
+    "tests_status": "not_run",
+    "smokes_status": "not_run",
+    "runtime_health": "empty",
+    "test_health": "not_run",
+    "risk": "unknown",
+    "next_recommended_step": null,
+    "open_debts": [],
+    "files_modified_count": 0,
+    "files_created_count": 0,
+    "modules_touched": [],
+    "contracts_affected": [],
+    "known_good": null,
+    "known_weakness": null,
+    "version_closed_for_scope": null,
+    "review_artifacts_needed": []
+  },
+  "stats": {
+    "total_entries": 0,
+    "completed_entries": 0,
+    "in_progress_entries": 0,
+    "closed_versions": []
+  },
+  "known_issues": {
+    "latest_open_debts": [],
+    "latest_regressions_detected": [],
+    "latest_long_tail_failures": []
+  },
+  "runtime_patterns": {
+    "fallback_patterns": [],
+    "degradation_patterns": [],
+    "critic_patterns": [],
+    "router_patterns": []
+  },
+  "model_bank": {
+    "production_models": [],
+    "candidate_models": [],
+    "lab_models": [],
+    "benchmark_readiness": "",
+    "blocked_models": [],
+    "promotion_candidates": [],
+    "do_not_promote_notes": [],
+    "model_family_notes": []
+  },
+  "entries": []
 }
