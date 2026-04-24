@@ -558,14 +558,108 @@ def build_likes_response(memory: dict[str, Any]) -> str:
     return "Todavía no tengo gustos tuyos guardados."
 
 
-def build_preferences_response(memory: dict[str, Any]) -> str:
-    if memory.get("preferences"):
-        return f"Tus preferencias guardadas son: {_format_items(memory['preferences'])}."
+def _extract_asked_preference_type(user_input: str) -> str | None:
+    """Extraer el tipo de preferencia consultado (ej: 'comida', 'color', 'película').
 
-    return "Todavía no tengo preferencias tuyas guardadas."
+    Usa ASK_FAVORITE_PATTERN que ya captura el grupo con el tipo.
+    Retorna None si no se puede extraer.
+    """
+    if not user_input:
+        return None
+
+    match = ASK_FAVORITE_PATTERN.search(user_input)
+    if not match:
+        return None
+
+    # El patrón tiene dos grupos alternativos: grupo1 o grupo2
+    preference_type = match.group(1) or match.group(2)
+    if not preference_type:
+        return None
+
+    return _truncate_clause(preference_type).strip().lower()
 
 
-def build_memory_response(memory: dict[str, Any], memory_intent: str | None) -> str:
+def _find_specific_preference(
+    preference_type: str,
+    preferences: list[str],
+) -> str | None:
+    """Buscar en la lista de preferencias un ítem que coincida con el tipo consultado.
+
+    Hace matching por prefijo normalizado contra la clave guardada
+    (ej: 'comida favorito: pizza' → busca ítem que empiece con 'comida').
+    """
+    if not preference_type or not preferences:
+        return None
+
+    type_key = normalize_internal_text(preference_type)
+
+    for pref in preferences:
+        pref_key = normalize_internal_text(pref)
+        # El formato guardado es "tipo favorito: valor"
+        if pref_key.startswith(type_key):
+            return pref
+
+    return None
+
+
+def _format_preference_value(pref_item: str) -> str | None:
+    """Extraer el valor de un ítem de preferencia formateado como 'tipo favorito: valor'.
+
+    Retorna (tipo, valor) o None si no puede parsear.
+    """
+    if not pref_item:
+        return None
+
+    # Formato esperado: "tipo favorito: valor"
+    if ":" not in pref_item:
+        return None
+
+    parts = pref_item.split(":", 1)
+    if len(parts) != 2:
+        return None
+
+    return parts[1].strip()
+
+
+def _resolve_preference_gender(preference_type: str) -> str:
+    """Resolver si usar 'favorito' o 'favorita' según el género del tipo."""
+    if preference_type.endswith("a"):
+        return "favorita"
+    return "favorito"
+
+
+def build_preferences_response(
+    memory: dict[str, Any],
+    user_input: str = "",
+) -> str:
+    preferences = memory.get("preferences")
+    if not preferences:
+        return "Todavía no tengo preferencias tuyas guardadas."
+
+    # Intentar extraer preferencia específica
+    asked_type = _extract_asked_preference_type(user_input)
+    if asked_type:
+        matched_pref = _find_specific_preference(asked_type, preferences)
+        if matched_pref:
+            value = _format_preference_value(matched_pref)
+            if value:
+                gender = _resolve_preference_gender(asked_type)
+                return f"Tu {asked_type} {gender} es {value}."
+            # Si no se puede parsear, devolver el ítem completo
+            return f"Tengo guardado que tu {asked_type} {_resolve_preference_gender(asked_type)} es {matched_pref}."
+
+        # Preferencia específica no encontrada
+        return f"No tengo guardado cuál es tu {asked_type} favorita."
+
+    # Sin preferencia específica detectable → respuesta genérica
+    return f"Tus preferencias guardadas son: {_format_items(preferences)}."
+
+
+def build_memory_response(
+    memory: dict[str, Any],
+    memory_intent: str | None,
+    user_input: str = "",
+) -> str:
     if memory_intent == MEMORY_INTENT_NAME:
         return build_name_response(memory)
 
@@ -576,7 +670,7 @@ def build_memory_response(memory: dict[str, Any], memory_intent: str | None) -> 
         return build_likes_response(memory)
 
     if memory_intent == MEMORY_INTENT_PREFERENCES:
-        return build_preferences_response(memory)
+        return build_preferences_response(memory, user_input=user_input)
 
     return "[sin respuesta]"
 

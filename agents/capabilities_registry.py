@@ -163,7 +163,11 @@ def _handle_internal_tools_active(context: CapabilityContext) -> CapabilityExecu
 
 def _handle_memory_lookup(context: CapabilityContext) -> CapabilityExecution:
     return CapabilityExecution(
-        response=build_memory_response(context.memory, context.memory_intent),
+        response=build_memory_response(
+            context.memory,
+            context.memory_intent,
+            user_input=context.user_input_raw,
+        ),
         used_memory_override=True,
     )
 
