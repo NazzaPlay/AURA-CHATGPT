@@ -22,6 +22,10 @@ logs/
 # Archivos de memoria y estado
 memory.json
 
+# Backups locales (generados durante desarrollo)
+backups/
+backup/
+
 # Editor/IDE
 .vscode/
 .idea/

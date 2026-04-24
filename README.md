@@ -18,6 +18,7 @@ La infraestructura Hextech proporciona una jaula de seguridad para trabajar con 
 - [Límites del Routing Neuron](docs/hextech/RN_BOUNDARY.md) - Reglas de protección para el subsistema crítico **(única fuente de verdad para seguridad RN)**.
 - [Inventario Técnico](docs/hextech/PROJECT_INVENTORY.md) - Inventario técnico y mapa de riesgo operativo (H2.0).
 - [RN Family / Routing Neuron Mesh](docs/hextech/RN_FAMILY.md) - Arquitectura modular conceptual alrededor de RN Core.
+- [Protocolo DEV-CLEANUP](docs/hextech/DEV_CLEANUP_PROTOCOL.md) - Limpieza de estado vivo durante desarrollo activo.
 
 ## Estructura del proyecto
 

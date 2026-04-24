@@ -172,6 +172,7 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 - `README.md` - Documentación principal
 - `docs/hextech/PROJECT_INVENTORY.md` - Inventario técnico y mapa de riesgo
 - `docs/hextech/RN_FAMILY.md` - Arquitectura modular conceptual de RN Family
+- `docs/hextech/DEV_CLEANUP_PROTOCOL.md` - Protocolo de limpieza de estado vivo en desarrollo
 
 **Cuándo leerlos**:
 - Cualquier tarea de documentación
