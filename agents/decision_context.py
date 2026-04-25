@@ -122,7 +122,7 @@ def _is_internal_command(normalized_input: str) -> bool:
     # Patrones de comandos internos
     command_patterns = [
         # Patrones existentes
-        r"^(que|muestra|mostra|haz|revisa|abre|valida|chequea)\s+(las?\s+|un\s+)?(tools|herramientas|operaciones|capacidades|estado|memoria|diagnostico)",
+        r"^(que|muestra|mostra|haz|hacer|revisa|abre|valida|chequea)\s+(las?\s+|un\s+)?(tools|herramientas|operaciones|capacidades|estado|memoria|diagnostico)",
         r"^(diagnostico|diagnóstico|chequeo|revision|revisión|resumen)",
         r"^(como estas|estas lista|estas listo|que tan lista|que tan listo)",
         r"^(que puedes hacer|como puedes ayudar|que conviene hacer)",
