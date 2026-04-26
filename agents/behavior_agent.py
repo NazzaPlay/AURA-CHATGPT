@@ -114,6 +114,19 @@ TECHNICAL_KEYWORDS = {
     "oauth",
     "oauth2",
     "jwt",
+    "juego",
+    "juegos",
+    "pc",
+    "computadora",
+    "internet",
+    "wifi",
+    "modem",
+    "fuente",
+    "temperatura",
+    "fps",
+    "lag",
+    "cs2",
+    "valorant",
 }
 TECHNICAL_TROUBLESHOOT_HINTS = {
     "401",
@@ -216,6 +229,49 @@ SPECIFIC_TROUBLESHOOT_HINTS = {
     "traceback",
     "typeerror",
     "valueerror",
+}
+GAME_CRASH_KEYWORDS = {
+    "juego",
+    "juegos",
+    "cs2",
+    "valorant",
+    "crashea",
+    "crash",
+    "se cierra",
+    "tiron",
+    "tirones",
+    "fps",
+    "lag",
+    "se congela",
+    "pantalla azul jugando",
+}
+PC_SHUTDOWN_KEYWORDS = {
+    "pc",
+    "computadora",
+    "apaga",
+    "apagar",
+    "reinicia",
+    "reinicio",
+    "fuente",
+    "se apaga sola",
+    "se reinicia sola",
+}
+INTERNET_OUTAGE_KEYWORDS = {
+    "pc",
+    "computadora",
+    "internet",
+    "router",
+    "wifi",
+    "modem",
+    "red",
+    "conexion",
+    "conexion",
+    "dns",
+    "no anda internet",
+    "no funciona internet",
+    "sin internet",
+    "sin conexion",
+    "sin conexion",
 }
 MINIMAL_GREETING_COMMANDS = normalize_command_variants(
     {
@@ -356,6 +412,64 @@ def _build_generic_troubleshoot_response(
         response += " Ve una variable por vez para aislar la falla más rápido."
 
     return response
+
+
+
+def _build_practical_troubleshoot_response(
+    user_input: str,
+    profile: UserProfile | None = None,
+) -> str | None:
+    normalized_input = _normalize_text(user_input)
+
+    # Pattern A: Juego se cierra / crashea
+    if _contains_any(normalized_input, GAME_CRASH_KEYWORDS):
+        response = (
+            "Causa probable: el juego se cierra por falta de recursos (RAM/VRAM), "
+            "controladores desactualizados, temperatura alta o archivos corruptos.\n"
+            "Pasos de descarte:\n"
+            "1. Revisa temperaturas con MSI Afterburner o HWMonitor (GPU >85 C o CPU >90 C).\n"
+            "2. Actualiza drivers de GPU desde NVIDIA/AMD/Intel.\n"
+            "3. Verifica integridad de archivos del juego (Steam: clic derecho -> Propiedades -> Archivos locales).\n"
+            "4. Cerra otros programas pesados para liberar RAM.\n"
+            "Tiro algun mensaje de error antes de cerrarse, o se congela primero?"
+        )
+        if profile and (profile.prefers_practical or profile.works_in_workshop):
+            response += " Si es un juego online, revisa tambien latencia y perdida de paquetes."
+        return response
+
+    # Pattern B: PC se apaga sola
+    if _contains_any(normalized_input, PC_SHUTDOWN_KEYWORDS):
+        response = (
+            "Causa probable: temperatura alta (CPU/GPU), fuente de poder danada, "
+            "RAM defectuosa o problema electrico.\n"
+            "Pasos de descarte:\n"
+            "1. Revisa temperaturas: CPU >90 C o GPU >85 C -> posible pasta termica o cooler.\n"
+            "2. Escucha la fuente: ruidos, olor a quemado, o si se apaga exigiendola.\n"
+            "3. Proba la RAM: ejecuta mdsched.exe (diagnostico de memoria Windows).\n"
+            "4. Revisa el Visor de Eventos: Event Viewer -> Registros Windows -> Sistema -> errores ID 41 o 1001.\n"
+            "Se apaga de golpe (como si perdiera energia) o se va a negro con ventiladores andando?"
+        )
+        if profile and (profile.prefers_practical or profile.works_in_workshop):
+            response += " Si tenes un tester de fuente, medi los voltajes en reposo y bajo carga."
+        return response
+
+    # Pattern C: Internet no funciona
+    if _contains_any(normalized_input, INTERNET_OUTAGE_KEYWORDS):
+        response = (
+            "Causa probable: router, proveedor de internet, configuracion de red o drivers.\n"
+            "Pasos rapidos:\n"
+            "1. Reinicia el router: desenchufa 30 segundos, vuelve a enchufar.\n"
+            "2. Proba con otro dispositivo (celular) para saber si es el router o la PC.\n"
+            "3. Windows: terminal -> ipconfig /release -> ipconfig /renew -> ipconfig /flushdns.\n"
+            "4. Proba DNS 8.8.8.8 en configuracion de red.\n"
+            "5. Actualiza driver de placa de red.\n"
+            "Es solo esta PC o afecta a todos los dispositivos?"
+        )
+        if profile and (profile.prefers_practical or profile.works_in_workshop):
+            response += " Si es solo una PC, revisa tambien el antivirus o firewall."
+        return response
+
+    return None
 
 
 def build_stable_technical_explain_response(
@@ -884,6 +998,16 @@ def _classify_technical_intent(normalized_input: str) -> str | None:
     if not has_technical_keyword:
         return None
 
+    # Exclude words that contain "pc" but are not about PC (e.g. "podes", "puedes")
+    _technical_exclusion_words = {"podes", "puedes", "pocos", "poco", "poca", "pocas"}
+    if has_technical_keyword and any(
+        excl in normalized_input for excl in _technical_exclusion_words
+    ):
+        # Only exclude if the only technical keyword match is "pc" or "computadora"
+        matched_keywords = [kw for kw in TECHNICAL_KEYWORDS if kw in normalized_input]
+        if all(kw in ("pc", "computadora") for kw in matched_keywords):
+            return None
+
     has_troubleshoot_hint = any(
         hint in normalized_input for hint in TECHNICAL_TROUBLESHOOT_HINTS
     )
@@ -900,6 +1024,14 @@ def _classify_technical_intent(normalized_input: str) -> str | None:
     has_failure_hint = any(
         hint in normalized_input for hint in TECHNICAL_FAILURE_HINTS
     )
+    has_practical_troubleshoot = (
+        _contains_any(normalized_input, GAME_CRASH_KEYWORDS)
+        or _contains_any(normalized_input, PC_SHUTDOWN_KEYWORDS)
+        or _contains_any(normalized_input, INTERNET_OUTAGE_KEYWORDS)
+    )
+
+    if has_practical_troubleshoot:
+        return INTENT_TECHNICAL_TROUBLESHOOT
 
     if asks_for_explanation and _contains_any(
         normalized_input,
@@ -1152,6 +1284,8 @@ def plan_behavior_for_input(
 
     if resolved_intent == INTENT_TECHNICAL_TROUBLESHOOT:
         direct_response = _build_generic_troubleshoot_response(user_input, profile)
+        if not direct_response:
+            direct_response = _build_practical_troubleshoot_response(user_input, profile)
         if direct_response:
             return BehaviorPlan(
                 intent=resolved_intent,
