@@ -5,8 +5,9 @@ Corrige:
 - Verifica que analyze_decision("hacer un diagnóstico") → internal_tools
 - Verifica que _is_internal_command reconoce "hacer un diagnostico"
 """
+import os
 import sys
-sys.path.insert(0, "a:\\AURA\\project")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from agents.text_matching import matches_normalized_command
 from agents.internal_tools_agent import (
@@ -130,7 +131,7 @@ def test_rn_not_touched():
     import subprocess
     result = subprocess.run(
         ["git", "diff", "--name-only", "HEAD", "--", "backend/app/routing_neuron/"],
-        capture_output=True, text=True, cwd="a:\\AURA\\project"
+        capture_output=True, text=True, cwd=os.path.join(os.path.dirname(__file__), "..")
     )
     assert result.stdout.strip() == "", f"RN fue modificado: {result.stdout}"
     print("  [OK] RN no fue modificado")

@@ -423,6 +423,9 @@ def _build_practical_troubleshoot_response(
 
     # Pattern A: Juego se cierra / crashea
     if _contains_any(normalized_input, GAME_CRASH_KEYWORDS):
+        # Guarda de falso positivo: frases genéricas sobre juegos
+        if _contains_any(normalized_input, {"de mesa", "de futbol", "me gusta", "recomiendas"}):
+            return None
         response = (
             "Causa probable: el juego se cierra por falta de recursos (RAM/VRAM), "
             "controladores desactualizados, temperatura alta o archivos corruptos.\n"
@@ -431,23 +434,26 @@ def _build_practical_troubleshoot_response(
             "2. Actualiza drivers de GPU desde NVIDIA/AMD/Intel.\n"
             "3. Verifica integridad de archivos del juego (Steam: clic derecho -> Propiedades -> Archivos locales).\n"
             "4. Cerra otros programas pesados para liberar RAM.\n"
-            "Tiro algun mensaje de error antes de cerrarse, o se congela primero?"
+            "¿Tiró algún mensaje de error antes de cerrarse, o se congela primero?"
         )
         if profile and (profile.prefers_practical or profile.works_in_workshop):
-            response += " Si es un juego online, revisa tambien latencia y perdida de paquetes."
+            response += " Si es un juego online, revisa también latencia y pérdida de paquetes."
         return response
 
     # Pattern B: PC se apaga sola
     if _contains_any(normalized_input, PC_SHUTDOWN_KEYWORDS):
+        # Guarda de falso positivo: consultas de compra/recomendación
+        if _contains_any(normalized_input, {"recomiendas", "comprar"}):
+            return None
         response = (
-            "Causa probable: temperatura alta (CPU/GPU), fuente de poder danada, "
-            "RAM defectuosa o problema electrico.\n"
+            "Causa probable: temperatura alta (CPU/GPU), fuente de poder dañada, "
+            "RAM defectuosa o problema eléctrico.\n"
             "Pasos de descarte:\n"
-            "1. Revisa temperaturas: CPU >90 C o GPU >85 C -> posible pasta termica o cooler.\n"
+            "1. Revisa temperaturas: CPU >90 C o GPU >85 C -> posible pasta térmica o cooler.\n"
             "2. Escucha la fuente: ruidos, olor a quemado, o si se apaga exigiendola.\n"
-            "3. Proba la RAM: ejecuta mdsched.exe (diagnostico de memoria Windows).\n"
+            "3. Proba la RAM: ejecuta mdsched.exe (diagnóstico de memoria Windows).\n"
             "4. Revisa el Visor de Eventos: Event Viewer -> Registros Windows -> Sistema -> errores ID 41 o 1001.\n"
-            "Se apaga de golpe (como si perdiera energia) o se va a negro con ventiladores andando?"
+            "Se apaga de golpe (como si perdiera energía) o se va a negro con ventiladores andando?"
         )
         if profile and (profile.prefers_practical or profile.works_in_workshop):
             response += " Si tenes un tester de fuente, medi los voltajes en reposo y bajo carga."
@@ -455,18 +461,21 @@ def _build_practical_troubleshoot_response(
 
     # Pattern C: Internet no funciona
     if _contains_any(normalized_input, INTERNET_OUTAGE_KEYWORDS):
+        # Guarda de falso positivo: preguntas conceptuales sobre internet
+        if "que es internet" in normalized_input:
+            return None
         response = (
-            "Causa probable: router, proveedor de internet, configuracion de red o drivers.\n"
-            "Pasos rapidos:\n"
+            "Causa probable: router, proveedor de internet, configuración de red o drivers.\n"
+            "Pasos rápidos:\n"
             "1. Reinicia el router: desenchufa 30 segundos, vuelve a enchufar.\n"
             "2. Proba con otro dispositivo (celular) para saber si es el router o la PC.\n"
             "3. Windows: terminal -> ipconfig /release -> ipconfig /renew -> ipconfig /flushdns.\n"
-            "4. Proba DNS 8.8.8.8 en configuracion de red.\n"
+            "4. Proba DNS 8.8.8.8 en configuración de red.\n"
             "5. Actualiza driver de placa de red.\n"
             "Es solo esta PC o afecta a todos los dispositivos?"
         )
         if profile and (profile.prefers_practical or profile.works_in_workshop):
-            response += " Si es solo una PC, revisa tambien el antivirus o firewall."
+            response += " Si es solo una PC, revisa también el antivirus o firewall."
         return response
 
     return None

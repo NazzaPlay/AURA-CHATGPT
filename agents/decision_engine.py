@@ -119,7 +119,11 @@ def _record_decision(
 
 
 def _log_decision(context: DecisionContext, best_option: dict[str, Any]) -> None:
-    """Logging estructurado mínimo para debugging."""
+    """Logging estructurado mínimo para debugging.
+    NOTA: chosen_route refleja la decisión del Engine en esta etapa.
+    core_agent.py:_resolve_direct_response_route() puede sobrescribir
+    'model' por 'heuristic_response' si behavior_agent entrega direct_response.
+    TurnMetadata final tiene la ruta correcta."""
     log_entry = {
         "timestamp": datetime.now().isoformat(),
         "task_type": context.task_type.value,

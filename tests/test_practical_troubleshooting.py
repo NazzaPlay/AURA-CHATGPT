@@ -274,6 +274,34 @@ def test_no_false_positive_capabilities():
 
 
 # ============================================================
+# Tests de guardas de falso positivo (V0.33.5.1)
+# ============================================================
+
+def test_no_false_positive_pc_recommendation():
+    """'que pc me recomiendas' NO debe activar troubleshooting."""
+    result = _build_practical_troubleshoot_response("que pc me recomiendas")
+    assert result is None, (
+        "Consulta de recomendación no debe activar troubleshooting"
+    )
+
+
+def test_no_false_positive_game_mention():
+    """'juego de futbol' NO debe activar troubleshooting."""
+    result = _build_practical_troubleshoot_response("juego de futbol")
+    assert result is None, (
+        "Mención genérica de juego no debe activar troubleshooting"
+    )
+
+
+def test_no_false_positive_internet_definition():
+    """'que es internet' NO debe activar troubleshooting."""
+    result = _build_practical_troubleshoot_response("que es internet")
+    assert result is None, (
+        "Pregunta conceptual sobre internet no debe activar troubleshooting"
+    )
+
+
+# ============================================================
 # Ejecución directa
 # ============================================================
 
