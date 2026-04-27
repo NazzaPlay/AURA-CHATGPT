@@ -22,6 +22,7 @@ La infraestructura Hextech proporciona una jaula de seguridad para trabajar con 
 - [Protocolo DEV-CLEANUP](docs/hextech/DEV_CLEANUP_PROTOCOL.md) - Limpieza de estado vivo durante desarrollo activo.
 - [Model Bank Audit](docs/hextech/MODEL_BANK_AUDIT.md) - Auditoría del banco externo de modelos (H3.1).
 - [DeepSeek Provider Design](docs/hextech/DEEPSEEK_PROVIDER_DESIGN.md) - Diseño del provider remoto DeepSeek API (H3.2).
+- [Multimodel Routing Design](docs/hextech/MULTIMODEL_ROUTING_DESIGN.md) - Diseño de política de routing multimodelo local/remoto (H3.3).
 
 ## Estructura del proyecto
 

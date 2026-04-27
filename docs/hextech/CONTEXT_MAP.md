@@ -245,7 +245,24 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 
 **Riesgo de contexto**: Bajo (solo documentación de diseño)
 
-### 13. Git/Checkpoints
+### 13. Multimodel Routing Design (H3.3)
+**Archivos principales**:
+- `docs/hextech/MULTIMODEL_ROUTING_DESIGN.md` - Diseño de política de routing multimodelo local/remoto
+
+**Cuándo leerlos**:
+- Planificación de routing inteligente entre modelos locales y DeepSeek API
+- Diseño de matriz de decisión por tipo de tarea
+- Preparación para H3.3.1+ (implementación futura)
+- Comprensión de políticas de fallback, privacidad, costo y offline
+
+**Cuándo NO leerlos**:
+- Tareas de implementación directa (requieren plan H3.3.x aprobado)
+- Modificaciones a routing_policy.py o task_classifier.py (zona protegida)
+- Tareas de chat o configuración general
+
+**Riesgo de contexto**: Bajo (solo documentación de diseño)
+
+### 14. Git/Checkpoints
 **Archivos principales**:
 - `.gitignore` - Reglas de exclusión de Git
 - `.clinerules` - Reglas de seguridad para Cline

@@ -415,7 +415,7 @@ def _estimate_cost(self, input_tokens: int, output_tokens: int) -> float:
 ## 17. Relación con H3.3 (multimodel routing)
 
 - **H3.2** provee el provider remoto (`DeepSeekProvider`)
-- **H3.3** definirá **cuándo** usar DeepSeek vs local:
+- **H3.3** (ver `docs/hextech/MULTIMODEL_ROUTING_DESIGN.md`) define **cuándo** usar DeepSeek vs local:
   - Tareas de planificación → DeepSeek
   - Tareas de chat simple → Local
   - Validación cruzada → Ambos
@@ -423,6 +423,8 @@ def _estimate_cost(self, input_tokens: int, output_tokens: int) -> float:
 - Posible integración con `routing_policy.py` para decisiones de routing automáticas
 
 ### 17.1 Criterios de routing propuestos para H3.3
+
+> **Nota**: H3.3 refina estos criterios en una matriz de decisión completa. Ver `docs/hextech/MULTIMODEL_ROUTING_DESIGN.md` sección 7.
 
 | Tipo de tarea | Provider | Justificación |
 |---------------|----------|---------------|
