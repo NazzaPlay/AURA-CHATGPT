@@ -20,6 +20,7 @@ La infraestructura Hextech proporciona una jaula de seguridad para trabajar con 
 - [Inventario Técnico](docs/hextech/PROJECT_INVENTORY.md) - Inventario técnico y mapa de riesgo operativo (H2.0).
 - [RN Family / Routing Neuron Mesh](docs/hextech/RN_FAMILY.md) - Arquitectura modular conceptual alrededor de RN Core.
 - [Protocolo DEV-CLEANUP](docs/hextech/DEV_CLEANUP_PROTOCOL.md) - Limpieza de estado vivo durante desarrollo activo.
+- [Model Bank Audit](docs/hextech/MODEL_BANK_AUDIT.md) - Auditoría del banco externo de modelos (H3.1).
 
 ## Estructura del proyecto
 

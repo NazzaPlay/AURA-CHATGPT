@@ -248,11 +248,13 @@ providers/deepseek_provider.py (futuro)
 
 **Banco externo detectado (`A:\AURA\models/`)**:
 - El runtime de AURA detecta un banco de modelos externo en `A:\AURA\models`
-- Contiene aproximadamente **15 artefactos** entre modelos, configuraciones y archivos de soporte
-- **H3.1 (Model Bank Audit)** deberá inventariar este banco externo sin mover ni modificar archivos
-- La auditoría clasificará: formato (GGUF, safetensors, ckpt, tensor), tamaño, fuente, licencia, estado
+- Contiene **15 artefactos** (12 GGUF + 3 Safetensors), totalizando **38.26 GB**
+- **H3.1 (Model Bank Audit)** completado — ver `docs/hextech/MODEL_BANK_AUDIT.md`
+- La auditoría clasificó: formato, tamaño, fecha, estado y prioridad de uso
+- Los 12 GGUF son utilizables directamente por `local_llama_provider`
+- Los 3 Safetensors (22.62 GB) son candidatos a conversión futura en H3.6+
 
-**Nota importante**: H3.1 se limitará a **lectura e inventario**. No se convertirán modelos ni se modificarán archivos en `A:\AURA\models`.
+**Nota importante**: H3.1 se limitó a **lectura e inventario**. No se convirtieron modelos ni se modificaron archivos en `A:\AURA\models`.
 
 ---
 

@@ -210,7 +210,25 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 
 **Riesgo de contexto**: Bajo (solo documentación conceptual)
 
-### 11. Git/Checkpoints
+### 11. Model Bank / Banco de Modelos
+**Archivos principales**:
+- `docs/hextech/MODEL_BANK_AUDIT.md` - Auditoría del banco externo de modelos (H3.1)
+- `A:\AURA\models` - Banco externo de modelos (solo lectura, fuera del repo)
+
+**Cuándo leerlos**:
+- Planificación de uso de modelos locales
+- Evaluación de qué GGUF usar para tareas específicas
+- Preparación para conversión de safetensors a GGUF (H3.6+)
+- Consulta de clasificación, tamaños y prioridades de modelos
+
+**Cuándo NO leerlos**:
+- Tareas de implementación de RN o agentes
+- Modificaciones a modelos (prohibido sin plan H3.6+)
+- Tareas de chat o configuración general
+
+**Riesgo de contexto**: Bajo (solo documentación de inventario)
+
+### 12. Git/Checkpoints
 **Archivos principales**:
 - `.gitignore` - Reglas de exclusión de Git
 - `.clinerules` - Reglas de seguridad para Cline
