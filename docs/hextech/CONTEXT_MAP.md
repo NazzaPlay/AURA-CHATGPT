@@ -228,7 +228,24 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 
 **Riesgo de contexto**: Bajo (solo documentación de inventario)
 
-### 12. Git/Checkpoints
+### 12. DeepSeek API Provider Design (H3.2)
+**Archivos principales**:
+- `docs/hextech/DEEPSEEK_PROVIDER_DESIGN.md` - Diseño del provider remoto DeepSeek API
+
+**Cuándo leerlos**:
+- Planificación de integración de DeepSeek API como provider remoto
+- Diseño de rate limiting, budget control y fallback local
+- Preparación para H3.2.1+ (implementación futura)
+- Comprensión de la interfaz propuesta del provider
+
+**Cuándo NO leerlos**:
+- Tareas de implementación directa (requieren plan H3.2.x aprobado)
+- Modificaciones a providers existentes (zona protegida)
+- Tareas de chat o configuración general
+
+**Riesgo de contexto**: Bajo (solo documentación de diseño)
+
+### 13. Git/Checkpoints
 **Archivos principales**:
 - `.gitignore` - Reglas de exclusión de Git
 - `.clinerules` - Reglas de seguridad para Cline

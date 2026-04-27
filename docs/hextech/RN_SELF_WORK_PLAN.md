@@ -594,6 +594,7 @@ Este checklist debe completarse **antes de cualquier modificación a RN Core** (
 | `DEV_CLEANUP_PROTOCOL.md` | Protocolo de limpieza de estado vivo |
 | `AUTONOMY_PROTOCOL.md` | Protocolo de autonomía controlada |
 | `RN_SELF_WORK_PLAN.md` | **Este documento** |
+| `DEEPSEEK_PROVIDER_DESIGN.md` | Diseño del provider remoto DeepSeek API (H3.2) |
 
 ### 15.2 Archivos de código relacionados (solo referencia)
 
