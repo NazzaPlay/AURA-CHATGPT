@@ -277,7 +277,7 @@ RN-PS podrá sugerir ajustes en la matriz de decisión basado en histórico de r
 
 ## 18. Relación con RN Graph Keeper futuro (H3.7)
 
-RN-GK registrará las relaciones de routing como aristas en el grafo:
+RN-GK registrará las relaciones de routing como aristas en el grafo (ver `RN_GRAPH_SYSTEM_DESIGN.md` para el diseño conceptual completo del RN Graph System):
 
 - **Nodos**: `local_micro`, `local_liviano`, `local_mediano`, `local_pesado`, `deepseek_api`
 - **Aristas**: `activa_a` entre tipo de tarea y provider seleccionado

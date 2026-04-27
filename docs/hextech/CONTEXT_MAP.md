@@ -262,7 +262,24 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 
 **Riesgo de contexto**: Bajo (solo documentación de diseño)
 
-### 14. Git/Checkpoints
+### 14. RN Graph System / H3.4
+**Archivos principales**:
+- `docs/hextech/RN_GRAPH_SYSTEM_DESIGN.md` - Diseño conceptual del RN Graph System (H3.4)
+
+**Cuándo leerlos**:
+- Planificación de implementación del grafo (H3.4.1+)
+- Comprensión de nodos, aristas, eventos y relación con RN Family
+- Diseño de RN Graph Keeper futuro (H3.7)
+- Consulta de reglas de seguridad para registro de eventos
+
+**Cuándo NO leerlos**:
+- Tareas de implementación directa (requieren plan H3.4.x aprobado)
+- Modificaciones a RN Core (requieren `RN_WRITE_ALLOWED`)
+- Tareas de chat o configuración general
+
+**Riesgo de contexto**: Bajo (solo documentación de diseño)
+
+### 15. Git/Checkpoints
 **Archivos principales**:
 - `.gitignore` - Reglas de exclusión de Git
 - `.clinerules` - Reglas de seguridad para Cline

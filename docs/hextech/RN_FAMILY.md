@@ -300,6 +300,8 @@ Como parte del plan H3.0 (RN Self-Work), se identificaron **9 neuronas candidata
 
 **Nota**: Estas neuronas están documentadas en detalle en `RN_SELF_WORK_PLAN.md` (sección 11). Son candidatas conceptuales para fases futuras y no implican implementación inmediata. No modifican RN Core V1.8 ni requieren `RN_WRITE_ALLOWED`.
 
+**RN Graph Keeper (RN-GK)**: El diseño conceptual del sistema de grafos que gestionará RN-GK está documentado en `RN_GRAPH_SYSTEM_DESIGN.md` (H3.4). RN-GK sigue siendo una neurona candidata para H3.7.
+
 ---
 
 ## 11. Próximos pasos y consideraciones

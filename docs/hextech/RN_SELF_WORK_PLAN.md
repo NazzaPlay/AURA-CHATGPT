@@ -534,11 +534,13 @@ H3.0 → H3.1 → H3.2 → H3.3 → H3.4 → H3.5 → H3.6 → H3.7 → H3.8
 - **Duración estimada**: 1 sesión
 - **Documento**: `docs/hextech/MULTIMODEL_ROUTING_DESIGN.md`
 
-#### H3.4 — RN Graph System conceptual
+#### H3.4 — RN Graph System conceptual ✅
 - **Objetivo**: Diseñar el sistema de grafos para RN Family
-- **Entregables**: Especificación del grafo, formato JSON, tipos de aristas
+- **Entregables**: Especificación del grafo, formato JSON, tipos de aristas, relación con RN Family
 - **Restricciones**: No implementar, solo diseño
 - **Duración estimada**: 1 sesión
+- **Documento**: `docs/hextech/RN_GRAPH_SYSTEM_DESIGN.md`
+- **Estado**: ✅ Completado
 
 #### H3.5 — AURA Self-Work Loop controlado
 - **Objetivo**: Implementar el bucle seguro de auto-trabajo
@@ -599,6 +601,7 @@ Este checklist debe completarse **antes de cualquier modificación a RN Core** (
 | `RN_SELF_WORK_PLAN.md` | **Este documento** |
 | `DEEPSEEK_PROVIDER_DESIGN.md` | Diseño del provider remoto DeepSeek API (H3.2) |
 | `MULTIMODEL_ROUTING_DESIGN.md` | Diseño de política de routing multimodelo (H3.3) |
+| `RN_GRAPH_SYSTEM_DESIGN.md` | Diseño conceptual del sistema de grafos para RN Family (H3.4) |
 
 ### 15.2 Archivos de código relacionados (solo referencia)
 
