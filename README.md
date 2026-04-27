@@ -11,6 +11,7 @@ AURA es una IA/app personal modular en Python, diseñada con filosofía Hextech 
 La infraestructura Hextech proporciona una jaula de seguridad para trabajar con Auto-approve Edit:
 
 - [Protocolo de Autonomía](docs/hextech/AUTONOMY_PROTOCOL.md) - Guía de seguridad con Auto-approve Edit activado.
+- [Plan de Self-Work / Integración RN](docs/hextech/RN_SELF_WORK_PLAN.md) - Plan maestro para que AURA pueda auto-trabajarse de forma segura (H3.0).
 - [Flujo de Trabajo Cline](docs/hextech/CLINE_WORKFLOW.md) - Metodología para tareas (Plan Mode vs Act Mode) *(no implementado aún)*
 - [Presupuesto de Tokens](docs/hextech/TOKEN_BUDGET.md) - Optimización de contexto y uso eficiente de tokens *(no implementado aún)*
 - [Blueprint de Arquitectura](docs/hextech/HEXTECH_BLUEPRINT.md) - Principios, fases y zonas del proyecto.

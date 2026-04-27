@@ -282,6 +282,26 @@ Flujo conceptual seguro para cualquier cambio o propuesta:
 4. **Validación exhaustiva** antes de integración (RNF-4)
 5. **Supervisión humana** para cambios críticos
 
+## 10.5 Neuronas Self-Work candidatas (H3.0)
+
+Como parte del plan H3.0 (RN Self-Work), se identificaron **9 neuronas candidatas** adicionales para RN Family, orientadas específicamente al ciclo de auto-trabajo de AURA:
+
+| ID | Nombre | Familia | Prioridad | Fase estimada |
+|----|--------|---------|-----------|---------------|
+| RN-PV | RN Plan Validator | Governance | Alta | H3.7 |
+| RN-TG | RN Test Guardian | Governance | Alta | H3.7 |
+| RN-CA | RN Commit Auditor | Governance | Alta | H3.7 |
+| RN-GK | RN Graph Keeper | Kernel | Alta | H3.7 |
+| RN-MR | RN Memory Repair | Memory & Context | Media | H3.8+ |
+| RN-DV | RN Data Validator | Memory & Context | Media | H3.8+ |
+| RN-PS | RN Provider Supervisor | Runtime | Media | H3.8+ |
+| RN-CC | RN Context Curator | Memory & Context | Media | H3.8+ |
+| RN-MP | RN Model Profiler | Evolution | Baja | H3.8+ |
+
+**Nota**: Estas neuronas están documentadas en detalle en `RN_SELF_WORK_PLAN.md` (sección 11). Son candidatas conceptuales para fases futuras y no implican implementación inmediata. No modifican RN Core V1.8 ni requieren `RN_WRITE_ALLOWED`.
+
+---
+
 ## 11. Próximos pasos y consideraciones
 
 ### 11.1 Esta documentación es conceptual

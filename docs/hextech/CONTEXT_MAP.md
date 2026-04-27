@@ -191,7 +191,26 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 
 **Riesgo de contexto**: Bajo (zona segura)
 
-### 10. Git/Checkpoints
+### 10. AURA Self-Work / H3
+**Archivos principales**:
+- `docs/hextech/RN_SELF_WORK_PLAN.md` - Plan maestro de integración RN/Self-Work (H3.0)
+- `docs/hextech/RN_FAMILY.md` - Arquitectura modular conceptual RN Family
+- `docs/hextech/RN_BOUNDARY.md` - Reglas absolutas de protección RN
+
+**Cuándo leerlos**:
+- Planificación de tareas de auto-modificación controlada
+- Diseño de nuevas neuronas RN Family
+- Auditoría de seguridad para Self-Work
+- Comprensión del flujo AURA Self-Work Loop
+
+**Cuándo NO leerlos**:
+- Tareas de implementación directa (requieren plan H3.x aprobado)
+- Modificaciones a RN Core (requieren `RN_WRITE_ALLOWED`)
+- Tareas de chat o configuración general
+
+**Riesgo de contexto**: Bajo (solo documentación conceptual)
+
+### 11. Git/Checkpoints
 **Archivos principales**:
 - `.gitignore` - Reglas de exclusión de Git
 - `.clinerules` - Reglas de seguridad para Cline
