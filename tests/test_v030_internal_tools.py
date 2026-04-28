@@ -3637,19 +3637,20 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertEqual(len(set(responses)), len(responses))
 
     def test_non_regression_queries_keep_original_routes(self) -> None:
-        expectations = {
-            "que sabes de mi": "internal_query",
-            "que estado tienes": "system_state",
-            "muestrame el ultimo log": "maintenance",
-            "resume el ultimo turno": "maintenance",
-        }
+        with _codex_registry_mocks():
+            expectations = {
+                "que sabes de mi": "internal_query",
+                "que estado tienes": "system_state",
+                "muestrame el ultimo log": "maintenance",
+                "resume el ultimo turno": "maintenance",
+            }
 
-        for query, expected_route in expectations.items():
-            with self.subTest(query=query):
-                result = self._run_turn(query, memory={"name": "Ada"})
-                self.assertEqual(result.metadata.route, expected_route)
-                self.assertFalse(result.metadata.used_model)
-                self.assertTrue(result.response is None or isinstance(result.response, str))
+            for query, expected_route in expectations.items():
+                with self.subTest(query=query):
+                    result = self._run_turn(query, memory={"name": "Ada"})
+                    self.assertEqual(result.metadata.route, expected_route)
+                    self.assertFalse(result.metadata.used_model)
+                    self.assertTrue(result.response is None or isinstance(result.response, str))
 
     def test_prepare_turn_strips_windows_bom_from_piped_system_state_query(self) -> None:
         for raw_query in ("\ufeffque estado tienes", "ï»¿que estado tienes"):
@@ -3666,7 +3667,8 @@ class AuraV036CoreTest(unittest.TestCase):
                 self.assertEqual(turn_plan.route_decision.action, ROUTE_SYSTEM_STATE)
 
     def test_system_state_exposes_primary_and_critic_provider_status(self) -> None:
-        result = self._run_turn("que estado tienes", memory={"name": "Ada"})
+        with _codex_registry_mocks():
+            result = self._run_turn("que estado tienes", memory={"name": "Ada"})
         self.assertEqual(result.metadata.route, "system_state")
         self.assertIn("providers: primary", result.response)
         self.assertIn("local_primary", result.response)
@@ -3699,82 +3701,84 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertEqual(turn_plan.route_decision.action, ROUTE_SYSTEM_STATE)
 
     def test_system_state_queries_keep_direct_route_for_obvious_equivalents(self) -> None:
-        for query in (
-            "quiero ver el launch dossier",
-            "quiero ver actividad reciente de routing neuron",
-            "quiero ver el checkpoint routing neuron",
-        ):
-            with self.subTest(query=query):
-                result = self._run_turn(query, memory={"name": "Ada"})
-                self.assertEqual(result.metadata.route, "system_state")
-                self.assertFalse(result.metadata.used_model)
-                self.assertEqual(result.metadata.no_model_reason, "resolved_by_system_state")
+        with _codex_registry_mocks():
+            for query in (
+                "quiero ver el launch dossier",
+                "quiero ver actividad reciente de routing neuron",
+                "quiero ver el checkpoint routing neuron",
+            ):
+                with self.subTest(query=query):
+                    result = self._run_turn(query, memory={"name": "Ada"})
+                    self.assertEqual(result.metadata.route, "system_state")
+                    self.assertFalse(result.metadata.used_model)
+                    self.assertEqual(result.metadata.no_model_reason, "resolved_by_system_state")
 
     def test_system_state_surfaces_v0393_stack_health_and_effective_model_paths(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            stack = self._prepare_multistack_runtime(
-                root,
-                missing_models=("router",),
-            )
-            memory = {"name": "Ada"}
-            memory_file = root / "memory.json"
-            memory_file.write_text(json.dumps(memory, ensure_ascii=False), encoding="utf-8")
-            log_file = root / "session.json"
-            stale_primary = str(root / "granite-stale.gguf")
+        with _codex_registry_mocks():
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                stack = self._prepare_multistack_runtime(
+                    root,
+                    missing_models=("router",),
+                )
+                memory = {"name": "Ada"}
+                memory_file = root / "memory.json"
+                memory_file.write_text(json.dumps(memory, ensure_ascii=False), encoding="utf-8")
+                log_file = root / "session.json"
+                stale_primary = str(root / "granite-stale.gguf")
 
-            state_plan = prepare_turn(
-                "que estado tienes",
-                conversation=[],
-                memory=memory,
-            )
-            state_result = execute_turn(
-                state_plan,
-                conversation=[],
-                memory=memory,
-                memory_file=str(memory_file),
-                log_file=str(log_file),
-                llama_path=stack["llama"],
-                model_path=stale_primary,
-                aura_version=AURA_VERSION,
-            )
-            path_plan = prepare_turn(
-                "muestra tu ruta de modelo",
-                conversation=[],
-                memory=memory,
-            )
-            path_result = execute_turn(
-                path_plan,
-                conversation=[],
-                memory=memory,
-                memory_file=str(memory_file),
-                log_file=str(log_file),
-                llama_path=stack["llama"],
-                model_path=stale_primary,
-                aura_version=AURA_VERSION,
-            )
-            available_plan = prepare_turn(
-                "tienes modelo disponible",
-                conversation=[],
-                memory=memory,
-            )
-            available_result = execute_turn(
-                available_plan,
-                conversation=[],
-                memory=memory,
-                memory_file=str(memory_file),
-                log_file=str(log_file),
-                llama_path=stack["llama"],
-                model_path=stale_primary,
-                aura_version=AURA_VERSION,
-            )
+                state_plan = prepare_turn(
+                    "que estado tienes",
+                    conversation=[],
+                    memory=memory,
+                )
+                state_result = execute_turn(
+                    state_plan,
+                    conversation=[],
+                    memory=memory,
+                    memory_file=str(memory_file),
+                    log_file=str(log_file),
+                    llama_path=stack["llama"],
+                    model_path=stale_primary,
+                    aura_version=AURA_VERSION,
+                )
+                path_plan = prepare_turn(
+                    "muestra tu ruta de modelo",
+                    conversation=[],
+                    memory=memory,
+                )
+                path_result = execute_turn(
+                    path_plan,
+                    conversation=[],
+                    memory=memory,
+                    memory_file=str(memory_file),
+                    log_file=str(log_file),
+                    llama_path=stack["llama"],
+                    model_path=stale_primary,
+                    aura_version=AURA_VERSION,
+                )
+                available_plan = prepare_turn(
+                    "tienes modelo disponible",
+                    conversation=[],
+                    memory=memory,
+                )
+                available_result = execute_turn(
+                    available_plan,
+                    conversation=[],
+                    memory=memory,
+                    memory_file=str(memory_file),
+                    log_file=str(log_file),
+                    llama_path=stack["llama"],
+                    model_path=stale_primary,
+                    aura_version=AURA_VERSION,
+                )
 
-        self.assertIn("health degraded", state_result.response)
-        self.assertIn("pressure medium", state_result.response)
-        self.assertIn("faltan micro expert router", state_result.response)
-        self.assertIn("La ruta configurada del modelo es", path_result.response)
-        self.assertIn("La ruta usable detectada ahora es", path_result.response)
-        self.assertIn("Sí, el modelo está usable ahora", available_result.response)
+            self.assertIn("health degraded", state_result.response)
+            self.assertIn("pressure medium", state_result.response)
+            self.assertIn("faltan micro expert router", state_result.response)
+            self.assertIn("La ruta configurada del modelo es", path_result.response)
+            self.assertIn("La ruta usable detectada ahora es", path_result.response)
+            self.assertIn("Sí, el modelo está usable ahora", available_result.response)
 
     def test_system_state_exposes_routing_neuron_checkpoint_query(self) -> None:
         with _codex_registry_mocks():
@@ -4470,92 +4474,93 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertIn("skip_critic", activity_result.response)
 
     def test_replay_from_previous_log_surfaces_weak_signal_consistently(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            model_path, llama_path = self._prepare_runtime(
-                root,
-                model_available=False,
-            )
-            memory = {"name": "Ada"}
-            memory_file = root / "memory.json"
-            memory_file.write_text(
-                json.dumps(memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            prior_log_file = root / "session_20260401_010000.json"
-            prior_conversation: list[dict] = []
-
-            first_plan = prepare_turn(
-                "hola aura",
-                conversation=prior_conversation,
-                memory=memory,
-            )
-            self.assertIsNotNone(first_plan)
-            first_result = execute_turn(
-                first_plan,
-                conversation=prior_conversation,
-                memory=memory,
-                memory_file=str(memory_file),
-                log_file=str(prior_log_file),
-                llama_path=llama_path,
-                model_path=model_path,
-                aura_version=AURA_VERSION,
-            )
-            self.assertEqual(first_result.metadata.routing_neuron_decision_path, ROUTING_RUNTIME_PATH_NO_CANDIDATE_MATCH)
-            prior_log_file.write_text(
-                json.dumps(prior_conversation, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-
-            reset_default_routing_registry()
-            fresh_memory = {"name": "Ada"}
-            fresh_memory_file = root / "memory_fresh.json"
-            fresh_memory_file.write_text(
-                json.dumps(fresh_memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            current_log_file = root / "session_20260401_020000.json"
-            current_conversation: list[dict] = []
-            recovered_results = []
-
-            for query in (
-                "que estado tienes",
-                "checkpoint routing neuron",
-                "muestra actividad reciente de routing neuron",
-            ):
-                turn_plan = prepare_turn(
-                    query,
-                    conversation=current_conversation,
-                    memory=fresh_memory,
+        with _codex_registry_mocks():
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                model_path, llama_path = self._prepare_runtime(
+                    root,
+                    model_available=False,
                 )
-                self.assertIsNotNone(turn_plan)
-                result = execute_turn(
-                    turn_plan,
-                    conversation=current_conversation,
-                    memory=fresh_memory,
-                    memory_file=str(fresh_memory_file),
-                    log_file=str(current_log_file),
+                memory = {"name": "Ada"}
+                memory_file = root / "memory.json"
+                memory_file.write_text(
+                    json.dumps(memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                prior_log_file = root / "session_20260401_010000.json"
+                prior_conversation: list[dict] = []
+
+                first_plan = prepare_turn(
+                    "hola aura",
+                    conversation=prior_conversation,
+                    memory=memory,
+                )
+                self.assertIsNotNone(first_plan)
+                first_result = execute_turn(
+                    first_plan,
+                    conversation=prior_conversation,
+                    memory=memory,
+                    memory_file=str(memory_file),
+                    log_file=str(prior_log_file),
                     llama_path=llama_path,
                     model_path=model_path,
                     aura_version=AURA_VERSION,
                 )
-                current_log_file.write_text(
-                    json.dumps(current_conversation, ensure_ascii=False, indent=2),
+                self.assertEqual(first_result.metadata.routing_neuron_decision_path, ROUTING_RUNTIME_PATH_NO_CANDIDATE_MATCH)
+                prior_log_file.write_text(
+                    json.dumps(prior_conversation, ensure_ascii=False, indent=2),
                     encoding="utf-8",
                 )
-                recovered_results.append(result)
 
-        state_result, checkpoint_result, activity_result = recovered_results
+                reset_default_routing_registry()
+                fresh_memory = {"name": "Ada"}
+                fresh_memory_file = root / "memory_fresh.json"
+                fresh_memory_file.write_text(
+                    json.dumps(fresh_memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                current_log_file = root / "session_20260401_020000.json"
+                current_conversation: list[dict] = []
+                recovered_results = []
 
-        self.assertIn("sin historial runtime en memoria", state_result.response)
-        self.assertIn("señal débil visible recuperada de la última sesión registrada", state_result.response)
-        self.assertIn("no_candidate_match", state_result.response)
-        self.assertIn("sin historial runtime en memoria", checkpoint_result.response)
-        self.assertIn("señal débil visible recuperada de la última sesión registrada", checkpoint_result.response)
-        self.assertIn("no_candidate_match", checkpoint_result.response)
-        self.assertIn("replay visible desde la última sesión registrada", activity_result.response)
-        self.assertIn("sin candidata coincidente", activity_result.response)
-        self.assertIn("fallback no_match", activity_result.response)
+                for query in (
+                    "que estado tienes",
+                    "checkpoint routing neuron",
+                    "muestra actividad reciente de routing neuron",
+                ):
+                    turn_plan = prepare_turn(
+                        query,
+                        conversation=current_conversation,
+                        memory=fresh_memory,
+                    )
+                    self.assertIsNotNone(turn_plan)
+                    result = execute_turn(
+                        turn_plan,
+                        conversation=current_conversation,
+                        memory=fresh_memory,
+                        memory_file=str(fresh_memory_file),
+                        log_file=str(current_log_file),
+                        llama_path=llama_path,
+                        model_path=model_path,
+                        aura_version=AURA_VERSION,
+                    )
+                    current_log_file.write_text(
+                        json.dumps(current_conversation, ensure_ascii=False, indent=2),
+                        encoding="utf-8",
+                    )
+                    recovered_results.append(result)
+
+            state_result, checkpoint_result, activity_result = recovered_results
+
+            self.assertIn("sin historial runtime en memoria", state_result.response)
+            self.assertIn("señal débil visible recuperada de la última sesión registrada", state_result.response)
+            self.assertIn("no_candidate_match", state_result.response)
+            self.assertIn("sin historial runtime en memoria", checkpoint_result.response)
+            self.assertIn("señal débil visible recuperada de la última sesión registrada", checkpoint_result.response)
+            self.assertIn("no_candidate_match", checkpoint_result.response)
+            self.assertIn("replay visible desde la última sesión registrada", activity_result.response)
+            self.assertIn("sin candidata coincidente", activity_result.response)
+            self.assertIn("fallback no_match", activity_result.response)
 
     def test_system_state_admin_queries_expose_routing_neuron_repertoire(self) -> None:
         active_candidate = register_routing_neuron_candidate(
@@ -6536,7 +6541,8 @@ class AuraV036CoreTest(unittest.TestCase):
             self.assertIn("tool:system_state_reader", result.metadata.route_trace)
 
     def test_system_state_visible_version_matches_runtime_version(self) -> None:
-        result = self._run_turn("que estado tienes", memory={"name": "Ada"})
+        with _codex_registry_mocks():
+            result = self._run_turn("que estado tienes", memory={"name": "Ada"})
 
         self.assertIn("version AURA V0.39.6", result.response)
         self.assertNotIn("V0.38.8.1", result.response)
@@ -6664,7 +6670,8 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertNotIn("@echo pff", vscode_launcher)
 
     def test_system_state_metadata_is_direct_and_non_model(self) -> None:
-        result = self._run_turn("que estado tienes", memory={"name": "Ada"})
+        with _codex_registry_mocks():
+            result = self._run_turn("que estado tienes", memory={"name": "Ada"})
         metadata = result.metadata
         self.assertEqual(metadata.route, "system_state")
         self.assertEqual(metadata.routing_decision, "direct_system_state")
