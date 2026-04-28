@@ -296,7 +296,38 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 
 **Riesgo de contexto**: Bajo (solo documentación de diseño)
 
-### 16. Git/Checkpoints
+### 16. Archivos Raíz Pendientes de Clasificación
+**Archivos principales**:
+- `validate_sync.py` - Archivo raíz pendiente de clasificación
+
+**Cuándo leerlos**:
+- Auditoría para determinar su propósito y dependencias
+- Análisis de seguridad antes de cualquier modificación
+
+**Cuándo NO leerlos**:
+- Nunca modificar sin auditoría previa
+- No inferir cambios arquitectónicos basados solo en su nombre
+- No usarlo como referencia para decisiones de diseño
+
+**Riesgo de contexto**: Bajo (solo lectura de diagnóstico)
+
+### 17. Logs / Sesiones
+**Archivos principales**:
+- `logs/` - Registros de sesiones generadas (formato JSON)
+
+**Cuándo leerlos**:
+- Diagnóstico de comportamiento del sistema
+- Depuración de problemas de sesiones previas
+- Análisis de patrones de uso
+
+**Cuándo NO leerlos**:
+- No modificar archivos de log manualmente
+- No usar logs como única fuente para inferir cambios arquitectónicos sin revisión adicional
+- No basar decisiones de diseño en logs sin contexto del código fuente
+
+**Riesgo de contexto**: Bajo (solo datos de diagnóstico)
+
+### 18. Git/Checkpoints
 **Archivos principales**:
 - `.gitignore` - Reglas de exclusión de Git
 - `.clinerules` - Reglas de seguridad para Cline

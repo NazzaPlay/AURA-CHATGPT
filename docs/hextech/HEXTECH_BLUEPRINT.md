@@ -57,6 +57,9 @@ La arquitectura Hextech proporciona una jaula de seguridad y metodología para t
 - `main.py` - Punto de entrada principal
 - `aura.py` - Cliente AURA
 - `config.py` - Configuración del sistema
+- `memory_store.py` - Almacenamiento de memoria
+- `model_runner.py` - Ejecutor de modelos
+- `validate_sync.py` - ⚠️ **Pendiente de clasificación** — no modificar sin auditoría previa
 
 ### 2. Agentes
 - `agents/` - Todos los agentes de IA
