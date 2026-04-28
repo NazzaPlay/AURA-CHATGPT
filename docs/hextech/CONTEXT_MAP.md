@@ -300,7 +300,7 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 **Riesgo de contexto**: Bajo (solo documentación de diseño)
 
 
-### 17. Logs / Sesiones
+### 16. Logs / Sesiones
 **Archivos principales**:
 - `logs/` - Registros de sesiones generadas (formato JSON)
 
@@ -316,7 +316,7 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 
 **Riesgo de contexto**: Bajo (solo datos de diagnóstico)
 
-### 18. Git/Checkpoints
+### 17. Git/Checkpoints
 **Archivos principales**:
 - `.gitignore` - Reglas de exclusión de Git
 - `.clinerules` - Reglas de seguridad para Cline

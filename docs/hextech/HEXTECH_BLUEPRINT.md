@@ -94,6 +94,11 @@ La arquitectura Hextech proporciona una jaula de seguridad y metodología para t
 - `tests/` - Tests automatizados
 - **Protegido**: No modificar sin permiso explícito
 
+### 9. Logs
+- `logs/` - Registros de sesiones generadas (formato JSON)
+- **Uso permitido**: Solo lectura para diagnóstico
+- **No modificar archivos de log manualmente**
+
 ## Reglas de Seguridad
 
 ### Regla de Reorganización
