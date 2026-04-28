@@ -6,6 +6,9 @@ Tests synchronization between queue, registry, and log
 import unittest
 import json
 import os
+import tempfile
+import shutil
+from pathlib import Path
 from backend.app.routing_neuron.admin.initializer import (
     initialize_operational_supervisor,
     sync_registries,
@@ -18,11 +21,33 @@ class TestOperationalSupervisor(unittest.TestCase):
     """Test cases for Operational Supervisor V0.3 components"""
 
     def setUp(self):
-        """Set up test fixtures before each test method."""
+        """Set up test fixtures before each test method.
+        
+        Creates a temporary directory with copies of ops/ files to prevent
+        side effects on the real repository files.
+        """
+        self._orig_cwd = os.getcwd()
+        self._tmpdir = tempfile.mkdtemp()
+        
+        # Copy all ops files to the tempdir so relative paths resolve there
+        ops_src = Path(self._orig_cwd) / "ops"
+        ops_dst = Path(self._tmpdir) / "ops"
+        ops_dst.mkdir(parents=True, exist_ok=True)
+        
+        for fname in ["assistant_ops_registry.json", "task_queue.md", "execution_log.md"]:
+            shutil.copy2(str(ops_src / fname), str(ops_dst / fname))
+        
+        os.chdir(self._tmpdir)
+        
         self.test_task_id = "task_001"
         self.test_registry_path = "ops/assistant_ops_registry.json"
         self.test_queue_path = "ops/task_queue.md"
         self.test_log_path = "ops/execution_log.md"
+
+    def tearDown(self):
+        """Restore original working directory."""
+        os.chdir(self._orig_cwd)
+        shutil.rmtree(self._tmpdir)
 
     def test_initialize_operational_supervisor(self):
         """Test that operational supervisor initializes without error."""
