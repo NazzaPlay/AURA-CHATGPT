@@ -243,6 +243,7 @@ def _build_fake_codex_registry() -> dict:
         "latest": {
             "run_id": "codex-v0394",
             "version_target": "0.39.6",
+            "timestamp": "2026-04-28T00:00:00Z",
             "status": "completed",
             "work_type": "consolidation",
             "requested_scope": "test scope H3",
@@ -253,6 +254,7 @@ def _build_fake_codex_registry() -> dict:
         "entries": [{
             "run_id": "codex-v0394",
             "version_target": "0.39.6",
+            "timestamp": "2026-04-28T00:00:00Z",
             "status": "completed",
             "work_type": "consolidation",
             "requested_scope": "test scope H3",
