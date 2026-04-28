@@ -4266,212 +4266,214 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertIn("skip_critic", activity_result.response)
 
     def test_recent_activity_from_session_log_explains_considered_without_candidate_match(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            model_path, llama_path = self._prepare_runtime(
-                root,
-                model_available=False,
-            )
-            memory = {"name": "Ada"}
-            memory_file = root / "memory.json"
-            memory_file.write_text(
-                json.dumps(memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            prior_log_file = root / "session_20260401_010000.json"
-            conversation: list[dict] = []
+        with _codex_registry_mocks():
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                model_path, llama_path = self._prepare_runtime(
+                    root,
+                    model_available=False,
+                )
+                memory = {"name": "Ada"}
+                memory_file = root / "memory.json"
+                memory_file.write_text(
+                    json.dumps(memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                prior_log_file = root / "session_20260401_010000.json"
+                conversation: list[dict] = []
 
-            first_plan = prepare_turn(
-                "hola aura",
-                conversation=conversation,
-                memory=memory,
-            )
-            self.assertIsNotNone(first_plan)
-            first_result = execute_turn(
-                first_plan,
-                conversation=conversation,
-                memory=memory,
-                memory_file=str(memory_file),
-                log_file=str(prior_log_file),
-                llama_path=llama_path,
-                model_path=model_path,
-                aura_version=AURA_VERSION,
-            )
-            self.assertEqual(first_result.metadata.routing_neuron_decision_path, ROUTING_RUNTIME_PATH_NO_CANDIDATE_MATCH)
-            prior_log_file.write_text(
-                json.dumps(conversation, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
+                first_plan = prepare_turn(
+                    "hola aura",
+                    conversation=conversation,
+                    memory=memory,
+                )
+                self.assertIsNotNone(first_plan)
+                first_result = execute_turn(
+                    first_plan,
+                    conversation=conversation,
+                    memory=memory,
+                    memory_file=str(memory_file),
+                    log_file=str(prior_log_file),
+                    llama_path=llama_path,
+                    model_path=model_path,
+                    aura_version=AURA_VERSION,
+                )
+                self.assertEqual(first_result.metadata.routing_neuron_decision_path, ROUTING_RUNTIME_PATH_NO_CANDIDATE_MATCH)
+                prior_log_file.write_text(
+                    json.dumps(conversation, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
 
-            reset_default_routing_registry()
-            fresh_memory = {"name": "Ada"}
-            fresh_memory_file = root / "memory_fresh.json"
-            fresh_memory_file.write_text(
-                json.dumps(fresh_memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            fresh_conversation: list[dict] = []
-            fresh_log_file = root / "session_20260401_020000.json"
+                reset_default_routing_registry()
+                fresh_memory = {"name": "Ada"}
+                fresh_memory_file = root / "memory_fresh.json"
+                fresh_memory_file.write_text(
+                    json.dumps(fresh_memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                fresh_conversation: list[dict] = []
+                fresh_log_file = root / "session_20260401_020000.json"
 
-            activity_plan = prepare_turn(
-                "muestra actividad reciente de routing neuron",
-                conversation=fresh_conversation,
-                memory=fresh_memory,
-            )
-            self.assertIsNotNone(activity_plan)
-            activity_result = execute_turn(
-                activity_plan,
-                conversation=fresh_conversation,
-                memory=fresh_memory,
-                memory_file=str(fresh_memory_file),
-                log_file=str(fresh_log_file),
-                llama_path=llama_path,
-                model_path=model_path,
-                aura_version=AURA_VERSION,
-            )
+                activity_plan = prepare_turn(
+                    "muestra actividad reciente de routing neuron",
+                    conversation=fresh_conversation,
+                    memory=fresh_memory,
+                )
+                self.assertIsNotNone(activity_plan)
+                activity_result = execute_turn(
+                    activity_plan,
+                    conversation=fresh_conversation,
+                    memory=fresh_memory,
+                    memory_file=str(fresh_memory_file),
+                    log_file=str(fresh_log_file),
+                    llama_path=llama_path,
+                    model_path=model_path,
+                    aura_version=AURA_VERSION,
+                )
 
-        self.assertIn("sin historial runtime en memoria", activity_result.response)
-        self.assertIn("no_candidate_match", activity_result.response)
-        self.assertIn("sin candidata coincidente", activity_result.response)
-        self.assertIn("considerada globalmente sin candidata coincidente", activity_result.response)
-        self.assertIn("fallback no_match", activity_result.response)
+            self.assertIn("sin historial runtime en memoria", activity_result.response)
+            self.assertIn("no_candidate_match", activity_result.response)
+            self.assertIn("sin candidata coincidente", activity_result.response)
+            self.assertIn("considerada globalmente sin candidata coincidente", activity_result.response)
+            self.assertIn("fallback no_match", activity_result.response)
 
     def test_replay_from_previous_log_survives_after_current_session_writes_non_rn_log(self) -> None:
-        candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_explain:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3"),
-            failure_history=(),
-            expected_gain=0.2,
-            estimated_cost=0.25,
-            estimated_latency=90.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        self.assertIsNotNone(candidate)
+        with _codex_registry_mocks():
+            candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_explain:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3"),
+                failure_history=(),
+                expected_gain=0.2,
+                estimated_cost=0.25,
+                estimated_latency=90.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            self.assertIsNotNone(candidate)
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            stack = self._prepare_multistack_runtime(
-                root,
-                granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
-                critic_output="VERIFICADA: sin conflicto claro.",
-            )
-            registry = build_empty_routing_neuron_registry().register_candidate(candidate)
-            registry = registry.activate_candidate(candidate.neuron_id)
-            set_default_routing_registry(registry)
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                stack = self._prepare_multistack_runtime(
+                    root,
+                    granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
+                    critic_output="VERIFICADA: sin conflicto claro.",
+                )
+                registry = build_empty_routing_neuron_registry().register_candidate(candidate)
+                registry = registry.activate_candidate(candidate.neuron_id)
+                set_default_routing_registry(registry)
 
-            memory = {"name": "Ada"}
-            memory_file = root / "memory.json"
-            memory_file.write_text(
-                json.dumps(memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            prior_log_file = root / "session_20260401_010000.json"
-            prior_conversation: list[dict] = []
+                memory = {"name": "Ada"}
+                memory_file = root / "memory.json"
+                memory_file.write_text(
+                    json.dumps(memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                prior_log_file = root / "session_20260401_010000.json"
+                prior_conversation: list[dict] = []
 
-            first_plan = prepare_turn(
-                "explicame una api con auth, rollback y riesgo en produccion",
-                conversation=prior_conversation,
-                memory=memory,
-            )
-            self.assertIsNotNone(first_plan)
-            first_result = execute_turn(
-                first_plan,
-                conversation=prior_conversation,
-                memory=memory,
-                memory_file=str(memory_file),
-                log_file=str(prior_log_file),
-                llama_path=stack["llama"],
-                model_path=stack["primary"],
-                aura_version=AURA_VERSION,
-            )
-            self.assertTrue(first_result.metadata.routing_neuron_applied)
-            prior_log_file.write_text(
-                json.dumps(prior_conversation, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
+                first_plan = prepare_turn(
+                    "explicame una api con auth, rollback y riesgo en produccion",
+                    conversation=prior_conversation,
+                    memory=memory,
+                )
+                self.assertIsNotNone(first_plan)
+                first_result = execute_turn(
+                    first_plan,
+                    conversation=prior_conversation,
+                    memory=memory,
+                    memory_file=str(memory_file),
+                    log_file=str(prior_log_file),
+                    llama_path=stack["llama"],
+                    model_path=stack["primary"],
+                    aura_version=AURA_VERSION,
+                )
+                self.assertTrue(first_result.metadata.routing_neuron_applied)
+                prior_log_file.write_text(
+                    json.dumps(prior_conversation, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
 
-            reset_default_routing_registry()
-            fresh_memory = {"name": "Ada"}
-            fresh_memory_file = root / "memory_fresh.json"
-            fresh_memory_file.write_text(
-                json.dumps(fresh_memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            current_log_file = root / "session_20260401_020000.json"
-            current_conversation: list[dict] = []
+                reset_default_routing_registry()
+                fresh_memory = {"name": "Ada"}
+                fresh_memory_file = root / "memory_fresh.json"
+                fresh_memory_file.write_text(
+                    json.dumps(fresh_memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                current_log_file = root / "session_20260401_020000.json"
+                current_conversation: list[dict] = []
 
-            state_plan = prepare_turn(
-                "que estado tienes",
-                conversation=current_conversation,
-                memory=fresh_memory,
-            )
-            self.assertIsNotNone(state_plan)
-            state_result = execute_turn(
-                state_plan,
-                conversation=current_conversation,
-                memory=fresh_memory,
-                memory_file=str(fresh_memory_file),
-                log_file=str(current_log_file),
-                llama_path=stack["llama"],
-                model_path=stack["primary"],
-                aura_version=AURA_VERSION,
-            )
-            current_log_file.write_text(
-                json.dumps(current_conversation, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
+                state_plan = prepare_turn(
+                    "que estado tienes",
+                    conversation=current_conversation,
+                    memory=fresh_memory,
+                )
+                self.assertIsNotNone(state_plan)
+                state_result = execute_turn(
+                    state_plan,
+                    conversation=current_conversation,
+                    memory=fresh_memory,
+                    memory_file=str(fresh_memory_file),
+                    log_file=str(current_log_file),
+                    llama_path=stack["llama"],
+                    model_path=stack["primary"],
+                    aura_version=AURA_VERSION,
+                )
+                current_log_file.write_text(
+                    json.dumps(current_conversation, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
 
-            checkpoint_plan = prepare_turn(
-                "checkpoint routing neuron",
-                conversation=current_conversation,
-                memory=fresh_memory,
-            )
-            self.assertIsNotNone(checkpoint_plan)
-            checkpoint_result = execute_turn(
-                checkpoint_plan,
-                conversation=current_conversation,
-                memory=fresh_memory,
-                memory_file=str(fresh_memory_file),
-                log_file=str(current_log_file),
-                llama_path=stack["llama"],
-                model_path=stack["primary"],
-                aura_version=AURA_VERSION,
-            )
-            current_log_file.write_text(
-                json.dumps(current_conversation, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
+                checkpoint_plan = prepare_turn(
+                    "checkpoint routing neuron",
+                    conversation=current_conversation,
+                    memory=fresh_memory,
+                )
+                self.assertIsNotNone(checkpoint_plan)
+                checkpoint_result = execute_turn(
+                    checkpoint_plan,
+                    conversation=current_conversation,
+                    memory=fresh_memory,
+                    memory_file=str(fresh_memory_file),
+                    log_file=str(current_log_file),
+                    llama_path=stack["llama"],
+                    model_path=stack["primary"],
+                    aura_version=AURA_VERSION,
+                )
+                current_log_file.write_text(
+                    json.dumps(current_conversation, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
 
-            activity_plan = prepare_turn(
-                "muestra actividad reciente de routing neuron",
-                conversation=current_conversation,
-                memory=fresh_memory,
-            )
-            self.assertIsNotNone(activity_plan)
-            activity_result = execute_turn(
-                activity_plan,
-                conversation=current_conversation,
-                memory=fresh_memory,
-                memory_file=str(fresh_memory_file),
-                log_file=str(current_log_file),
-                llama_path=stack["llama"],
-                model_path=stack["primary"],
-                aura_version=AURA_VERSION,
-            )
+                activity_plan = prepare_turn(
+                    "muestra actividad reciente de routing neuron",
+                    conversation=current_conversation,
+                    memory=fresh_memory,
+                )
+                self.assertIsNotNone(activity_plan)
+                activity_result = execute_turn(
+                    activity_plan,
+                    conversation=current_conversation,
+                    memory=fresh_memory,
+                    memory_file=str(fresh_memory_file),
+                    log_file=str(current_log_file),
+                    llama_path=stack["llama"],
+                    model_path=stack["primary"],
+                    aura_version=AURA_VERSION,
+                )
 
-        self.assertIn("sin historial runtime en memoria", state_result.response)
-        self.assertIn("la última sesión registrada", state_result.response)
-        self.assertIn("selected_and_applied", state_result.response)
-        self.assertIn("sin historial runtime en memoria", checkpoint_result.response)
-        self.assertIn("la última sesión registrada", checkpoint_result.response)
-        self.assertIn("selected_and_applied", checkpoint_result.response)
-        self.assertIn("replay visible desde la última sesión registrada", activity_result.response)
-        self.assertIn("selected_and_applied", activity_result.response)
-        self.assertIn("skip_critic", activity_result.response)
+            self.assertIn("sin historial runtime en memoria", state_result.response)
+            self.assertIn("la última sesión registrada", state_result.response)
+            self.assertIn("selected_and_applied", state_result.response)
+            self.assertIn("sin historial runtime en memoria", checkpoint_result.response)
+            self.assertIn("la última sesión registrada", checkpoint_result.response)
+            self.assertIn("selected_and_applied", checkpoint_result.response)
+            self.assertIn("replay visible desde la última sesión registrada", activity_result.response)
+            self.assertIn("selected_and_applied", activity_result.response)
+            self.assertIn("skip_critic", activity_result.response)
 
     def test_replay_from_previous_log_surfaces_weak_signal_consistently(self) -> None:
         with _codex_registry_mocks():
