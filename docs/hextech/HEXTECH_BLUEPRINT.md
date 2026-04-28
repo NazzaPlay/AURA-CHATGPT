@@ -59,7 +59,6 @@ La arquitectura Hextech proporciona una jaula de seguridad y metodología para t
 - `config.py` - Configuración del sistema
 - `memory_store.py` - Almacenamiento de memoria
 - `model_runner.py` - Ejecutor de modelos
-- `validate_sync.py` - ⚠️ **Pendiente de clasificación** — no modificar sin auditoría previa
 
 ### 2. Agentes
 - `agents/` - Todos los agentes de IA
@@ -78,6 +77,7 @@ La arquitectura Hextech proporciona una jaula de seguridad y metodología para t
 ### 5. Ops
 - `ops/` - Operaciones y registros
 - `ops/assistant_ops_registry.json` - Registro de operaciones
+- `validate_sync.py` - Herramienta de validación Ops (dev_tool) — solo lectura de archivos; ejecuta consultas RN
 
 ### 6. RN (Routing Neuron)
 - `backend/app/routing_neuron/` - Implementación de RN

@@ -110,16 +110,19 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 - `ops/assistant_ops_registry.json` - Registro de operaciones
 - `ops/execution_log.md` - Log de ejecución
 - `ops/task_queue.md` - Cola de tareas
+- `validate_sync.py` - Herramienta de validación Ops (dev_tool) — solo lectura de archivos; ejecuta consultas RN
 
 **Cuándo leerlos**:
 - Monitoreo de ejecución de tareas
 - Auditoría de operaciones realizadas
 - Depuración de problemas en colas
+- Validación de sincronización entre registry, queue y log
 
 **Cuándo NO leerlos**:
 - Tareas de chat en tiempo real
 - Modificaciones a agentes
 - Cambios en configuración de modelos
+- No modificar ni ejecutar sin revisión cuando la tarea involucre RN
 
 **Riesgo de contexto**: Bajo
 
@@ -296,20 +299,6 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 
 **Riesgo de contexto**: Bajo (solo documentación de diseño)
 
-### 16. Archivos Raíz Pendientes de Clasificación
-**Archivos principales**:
-- `validate_sync.py` - Archivo raíz pendiente de clasificación
-
-**Cuándo leerlos**:
-- Auditoría para determinar su propósito y dependencias
-- Análisis de seguridad antes de cualquier modificación
-
-**Cuándo NO leerlos**:
-- Nunca modificar sin auditoría previa
-- No inferir cambios arquitectónicos basados solo en su nombre
-- No usarlo como referencia para decisiones de diseño
-
-**Riesgo de contexto**: Bajo (solo lectura de diagnóstico)
 
 ### 17. Logs / Sesiones
 **Archivos principales**:

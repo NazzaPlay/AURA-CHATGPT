@@ -42,7 +42,7 @@ AURA/
 ├── aura.py           # Cliente AURA
 ├── memory_store.py   # Almacenamiento de memoria
 ├── model_runner.py   # Ejecutor de modelos
-├── validate_sync.py  # ⚠️ Pendiente de clasificación — no modificar sin auditoría previa
+├── validate_sync.py  # 📋 Herramienta de validación Ops (dev_tool) — solo lectura de archivos; ejecuta consultas RN
 ├── logs/             # Registros y sesiones generadas
 └── .clinerules       # Reglas de seguridad para Cline
 ```
