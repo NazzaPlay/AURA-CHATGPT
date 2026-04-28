@@ -279,7 +279,24 @@ Este mapa sirve para ahorrar tokens y navegar eficientemente el proyecto AURA. P
 
 **Riesgo de contexto**: Bajo (solo documentación de diseño)
 
-### 15. Git/Checkpoints
+### 15. Model Profiler / H3.5
+**Archivos principales**:
+- `docs/hextech/MODEL_PROFILER_DESIGN.md` - Diseño conceptual del sistema de profiling/benchmark de modelos (H3.5)
+
+**Cuándo leerlos**:
+- Planificación de profiling/benchmark de modelos locales GGUF
+- Diseño de métricas de rendimiento y calidad para modelos
+- Preparación para H3.5.1+ (implementación futura)
+- Comprensión de la relación entre profiling, routing multimodelo y RN Graph System
+
+**Cuándo NO leerlos**:
+- Tareas de implementación directa (requieren plan H3.5.x aprobado)
+- Modificaciones a model_runner.py, model_benchmark.py o providers (zona protegida)
+- Tareas de chat o configuración general
+
+**Riesgo de contexto**: Bajo (solo documentación de diseño)
+
+### 16. Git/Checkpoints
 **Archivos principales**:
 - `.gitignore` - Reglas de exclusión de Git
 - `.clinerules` - Reglas de seguridad para Cline

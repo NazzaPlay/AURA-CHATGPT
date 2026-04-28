@@ -24,6 +24,7 @@ La infraestructura Hextech proporciona una jaula de seguridad para trabajar con 
 - [DeepSeek Provider Design](docs/hextech/DEEPSEEK_PROVIDER_DESIGN.md) - Diseño del provider remoto DeepSeek API (H3.2).
 - [Multimodel Routing Design](docs/hextech/MULTIMODEL_ROUTING_DESIGN.md) - Diseño de política de routing multimodelo local/remoto (H3.3).
 - [RN Graph System Design](docs/hextech/RN_GRAPH_SYSTEM_DESIGN.md) - Diseño conceptual del sistema de grafos para RN Family (H3.4).
+- [Model Profiler / Benchmark Design](docs/hextech/MODEL_PROFILER_DESIGN.md) - Diseño conceptual del sistema de profiling/benchmark de modelos (H3.5).
 
 ## Estructura del proyecto
 
