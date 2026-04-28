@@ -3,8 +3,10 @@ import json
 import os
 import tempfile
 import unittest
+from contextlib import contextmanager
 from dataclasses import replace
 from pathlib import Path
+from unittest.mock import patch
 
 from agents.behavior_agent import BehaviorPlan, classify_user_intent
 from agents.capabilities_registry import (
@@ -231,6 +233,94 @@ from providers import (
     PROVIDER_RESULT_SUCCESS,
 )
 from model_runner import _extract_response
+
+
+def _build_fake_codex_registry() -> dict:
+    """Registry fake en memoria para tests system_state sin tocar disco."""
+    return {
+        "registry_version": "1.3",
+        "schema_version": "codex_control_registry.v1.3",
+        "latest": {
+            "run_id": "codex-v0394",
+            "version_target": "0.39.6",
+            "status": "completed",
+            "work_type": "consolidation",
+            "requested_scope": "test scope H3",
+            "summary": "resumen fake para test system_state",
+            "tests_status": "ok",
+            "smokes_status": "ok",
+        },
+        "entries": [{
+            "run_id": "codex-v0394",
+            "version_target": "0.39.6",
+            "status": "completed",
+            "work_type": "consolidation",
+            "requested_scope": "test scope H3",
+            "summary": "resumen fake para test system_state",
+            "files_modified": ["agents/system_state_agent.py"],
+            "files_created": ["backend/app/routing_neuron/control/codex_control_registry.json"],
+            "files_deleted": [],
+            "files_moved": [],
+            "modules_touched": ["agents.system_state_agent"],
+            "contracts_affected": ["codex_control_registry_schema"],
+            "tests_run": [],
+            "tests_result": {"status": "ok", "summary": "ok"},
+            "smokes_run": [],
+            "smokes_result": {"status": "ok", "summary": "ok"},
+            "checkpoint_short": "checkpoint fake H3.9B2",
+            "open_debts": ["long tail tecnico abierto"],
+            "aura_changes": [],
+            "rn_changes": [],
+            "model_bank_changes": [],
+            "next_recommended_step": "benchmark serio sobre candidatos inmediatos",
+            "rn_recent_outcomes": [],
+            "rn_recommendations": [],
+            "rn_attention_points": [],
+            "known_good": "zona estable fake",
+            "known_weakness": "debilidad fake",
+        }],
+        "latest_open_debts": ["long tail tecnico abierto"],
+        "latest_known_good": "zona estable fake",
+        "latest_known_weakness": "debilidad fake",
+        "latest_version_closed_for_scope": "0.39.6",
+        "latest_runtime_health": "watch",
+        "latest_risk": "medium",
+        "latest_checkpoint": "checkpoint fake",
+        "latest_checkpoint_short": "checkpoint fake",
+        "latest_next_step": "benchmark serio sobre candidatos inmediatos",
+        "latest_review_artifacts_needed": ["codex_control_registry.json"],
+        "known_issues": {"latest_long_tail_failures": []},
+        "runtime_patterns": {
+            "fallback_patterns": [],
+            "degradation_patterns": [],
+            "critic_patterns": [],
+            "router_patterns": [],
+        },
+        "model_bank": {
+            "production_models": ["Granite 3.0 1B-A400M-Instruct", "OLMo-2-0425-1B-Instruct"],
+            "candidate_models": [],
+            "lab_models": [],
+            "blocked_models": [],
+            "do_not_promote_notes": [],
+        },
+    }
+
+
+@contextmanager
+def _codex_registry_mocks():
+    """Context manager que mockea AMBOS caminos de side effect del registry real."""
+    fake = _build_fake_codex_registry()
+    patches = [
+        patch("agents.system_state_agent.load_codex_control_registry", return_value=fake),
+        patch("backend.app.routing_neuron.control.registry.load_codex_control_registry", return_value=fake),
+    ]
+    for p in patches:
+        p.start()
+    try:
+        yield
+    finally:
+        for p in patches:
+            p.stop()
 
 
 class AuraV036CoreTest(unittest.TestCase):
@@ -3680,7 +3770,8 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertIn("Sí, el modelo está usable ahora", available_result.response)
 
     def test_system_state_exposes_routing_neuron_checkpoint_query(self) -> None:
-        result = self._run_turn("checkpoint routing neuron", memory={"name": "Ada"})
+        with _codex_registry_mocks():
+            result = self._run_turn("checkpoint routing neuron", memory={"name": "Ada"})
 
         self.assertEqual(result.metadata.route, "system_state")
         self.assertFalse(result.metadata.used_model)
@@ -3702,12 +3793,13 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertIn("deuda V1.x", result.response)
 
     def test_system_state_exposes_codex_registry_queries(self) -> None:
-        latest_result = self._run_turn("ultimo trabajo de codex", memory={"name": "Ada"})
-        status_result = self._run_turn("estado del registro de codex", memory={"name": "Ada"})
-        changes_result = self._run_turn("que cambio codex", memory={"name": "Ada"})
-        debt_result = self._run_turn("ultima deuda de codex", memory={"name": "Ada"})
-        version_result = self._run_turn("que version cerro codex", memory={"name": "Ada"})
-        pending_result = self._run_turn("que quedo pendiente en codex", memory={"name": "Ada"})
+        with _codex_registry_mocks():
+            latest_result = self._run_turn("ultimo trabajo de codex", memory={"name": "Ada"})
+            status_result = self._run_turn("estado del registro de codex", memory={"name": "Ada"})
+            changes_result = self._run_turn("que cambio codex", memory={"name": "Ada"})
+            debt_result = self._run_turn("ultima deuda de codex", memory={"name": "Ada"})
+            version_result = self._run_turn("que version cerro codex", memory={"name": "Ada"})
+            pending_result = self._run_turn("que quedo pendiente en codex", memory={"name": "Ada"})
 
         for result in (
             latest_result,
@@ -3731,26 +3823,27 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertNotIn("respondes siempre", changes_result.response.casefold())
 
     def test_system_state_covers_work_assistant_queries_without_model(self) -> None:
-        expectations = {
-            "que tocarias primero": "Yo tocaria primero",
-            "como lo dividirias": "Lo dividiria en 3 pasos",
-            "que riesgos ves": "Riesgo actual",
-            "que quedo debil": "Lo que sigue flojo",
-            "que revisarias": "Yo revisaria",
-            "que sigue ahora": "siguiente paso recomendado",
-            "que parte del sistema tocarias": "Yo tocaria primero",
-            "que esta consolidado": "Lo mas consolidado ahora",
-            "que no tocarias todavia": "Todavia no tocaria el corazon multimodelo",
-            "que modelo usarias para esto": "Granite",
-        }
+        with _codex_registry_mocks():
+            expectations = {
+                "que tocarias primero": "Yo tocaria primero",
+                "como lo dividirias": "Lo dividiria en 3 pasos",
+                "que riesgos ves": "Riesgo actual",
+                "que quedo debil": "Lo que sigue flojo",
+                "que revisarias": "Yo revisaria",
+                "que sigue ahora": "siguiente paso recomendado",
+                "que parte del sistema tocarias": "Yo tocaria primero",
+                "que esta consolidado": "Lo mas consolidado ahora",
+                "que no tocarias todavia": "Todavia no tocaria el corazon multimodelo",
+                "que modelo usarias para esto": "Granite",
+            }
 
-        for query, expected_marker in expectations.items():
-            with self.subTest(query=query):
-                result = self._run_turn(query, memory={"name": "Ada"})
-                self.assertEqual(result.metadata.route, "system_state")
-                self.assertFalse(result.metadata.used_model)
-                self.assertEqual(result.metadata.no_model_reason, "resolved_by_system_state")
-                self.assertIn(expected_marker, result.response)
+            for query, expected_marker in expectations.items():
+                with self.subTest(query=query):
+                    result = self._run_turn(query, memory={"name": "Ada"})
+                    self.assertEqual(result.metadata.route, "system_state")
+                    self.assertFalse(result.metadata.used_model)
+                    self.assertEqual(result.metadata.no_model_reason, "resolved_by_system_state")
+                    self.assertIn(expected_marker, result.response)
 
     def test_system_state_model_choice_can_use_recent_context(self) -> None:
         result = self._run_turn(
