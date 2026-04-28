@@ -250,6 +250,10 @@ def _build_fake_codex_registry() -> dict:
             "summary": "resumen fake para test system_state",
             "tests_status": "ok",
             "smokes_status": "ok",
+            "files_modified_count": 1,
+            "files_created_count": 1,
+            "modules_touched": ["agents.system_state_agent"],
+            "contracts_affected": ["codex_control_registry_schema"],
         },
         "entries": [{
             "run_id": "codex-v0394",
@@ -286,6 +290,7 @@ def _build_fake_codex_registry() -> dict:
         "latest_known_weakness": "debilidad fake",
         "latest_version_closed_for_scope": "0.39.6",
         "latest_runtime_health": "watch",
+        "latest_test_health": "ok",
         "latest_risk": "medium",
         "latest_checkpoint": "checkpoint fake",
         "latest_checkpoint_short": "checkpoint fake",
