@@ -5335,335 +5335,336 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertIn(discardable_candidate.neuron_id, snapshot.discardable_ids)
 
     def test_system_state_admin_queries_expose_selection_and_bridge_views(self) -> None:
-        useful_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:selection_useful:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3", "ok-4", "ok-5", "ok-6"),
-            failure_history=(),
-            expected_gain=0.29,
-            estimated_cost=0.08,
-            estimated_latency=58.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        observed_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:selection_observed:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3"),
-            failure_history=(),
-            expected_gain=0.14,
-            estimated_cost=0.16,
-            estimated_latency=84.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        noise_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:selection_noise:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3"),
-            failure_history=("fail-1",),
-            expected_gain=0.08,
-            estimated_cost=0.24,
-            estimated_latency=110.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        blocked_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:selection_blocked:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
-            failure_history=("fail-1",),
-            expected_gain=0.18,
-            estimated_cost=0.14,
-            estimated_latency=76.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        self.assertIsNotNone(useful_candidate)
-        self.assertIsNotNone(observed_candidate)
-        self.assertIsNotNone(noise_candidate)
-        self.assertIsNotNone(blocked_candidate)
+        with _codex_registry_mocks():
+            useful_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:selection_useful:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3", "ok-4", "ok-5", "ok-6"),
+                failure_history=(),
+                expected_gain=0.29,
+                estimated_cost=0.08,
+                estimated_latency=58.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            observed_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:selection_observed:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3"),
+                failure_history=(),
+                expected_gain=0.14,
+                estimated_cost=0.16,
+                estimated_latency=84.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            noise_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:selection_noise:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3"),
+                failure_history=("fail-1",),
+                expected_gain=0.08,
+                estimated_cost=0.24,
+                estimated_latency=110.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            blocked_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:selection_blocked:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
+                failure_history=("fail-1",),
+                expected_gain=0.18,
+                estimated_cost=0.14,
+                estimated_latency=76.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            self.assertIsNotNone(useful_candidate)
+            self.assertIsNotNone(observed_candidate)
+            self.assertIsNotNone(noise_candidate)
+            self.assertIsNotNone(blocked_candidate)
 
-        useful_candidate = replace(
-            useful_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            global_routing_score=0.94,
-            confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
-            stability_label=ROUTING_STABILITY_STABLE,
-            successful_activations=6,
-            promotion_ready_signal=True,
-            readiness_band=ROUTING_READINESS_NEAR_READY,
-            readiness_reason="valor sostenido con poco ruido frente a baseline",
-            curation_status=ROUTING_CURATION_USEFUL,
-            curation_reason="ya muestra valor sostenido, buena higiene administrativa y poco ruido frente a baseline",
-            selection_status=ROUTING_SELECTION_SHORTLISTED,
-            selection_reason="entró en shortlist por valor sostenido, bajo ruido y señal de influencia útil",
-            influence_readiness=ROUTING_INFLUENCE_BRIDGE_WATCH,
-            influence_reason="ya merece entrar al puente conceptual hacia V0.39, aunque todavía sin promoción real",
-            bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_READY,
-            bridge_priority=ROUTING_REVIEW_PRIORITY_HIGH,
-            bridge_rationale="ya puede entrar a la bridge slate: valor sostenido, poco ruido y fit claro al stack verde",
-            bridge_blockers=(),
-            conceptual_role_fit=(ROUTING_STACK_FIT_SMOLLM2, ROUTING_STACK_FIT_GRANITE, ROUTING_STACK_FIT_OLMO),
-            conceptual_fit_reason="encaja como router o micro expert liviano / aporta criterio útil sobre el flujo primary conversacional / muestra afinidad con verificación o control crítico",
-            bridge_rehearsal_status=ROUTING_REHEARSAL_READY,
-            rehearsal_priority=ROUTING_REVIEW_PRIORITY_HIGH,
-            rehearsal_rationale="ya puede entrar a rehearsal: el preflight es robusto y la señal se sostiene con poco ruido",
-            rehearsal_blockers=(),
-            cutover_readiness=ROUTING_CUTOVER_GO_CANDIDATE,
-            cutover_rationale="ya merece un go/no-go administrativo favorable: rehearsal sólido, poco ruido y riesgos controlados",
-            rollback_concerns=(),
-            action_suggestion="review_bridge_readiness",
-            review_status=REVIEW_STATUS_RESOLVED,
-            alert_status=ALERT_STATUS_RESOLVED,
-            action_outcome=ACTION_OUTCOME_HELPED,
-        )
-        observed_candidate = replace(
-            observed_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            global_routing_score=0.69,
-            confidence_tier=ROUTING_CONFIDENCE_CONFIRMED_PATTERN,
-            stability_label=ROUTING_STABILITY_IMPROVING,
-            readiness_band=ROUTING_READINESS_EMERGING,
-            readiness_reason="ya muestra señal útil repetida y estable",
-            curation_status=ROUTING_CURATION_PROMISING,
-            curation_reason="ya tiene señales útiles, pero todavía necesita más observación antes de entrar en foco fuerte",
-            selection_status=ROUTING_SELECTION_OBSERVED_ONLY,
-            selection_reason="todavía conviene observarla antes de meterla en shortlist operativa",
-            influence_readiness=ROUTING_INFLUENCE_EMERGING,
-            influence_reason="todavía conviene mantenerla como señal útil en observación",
-            bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_DEFERRED,
-            bridge_priority=ROUTING_REVIEW_PRIORITY_MEDIUM,
-            bridge_rationale="todavía tiene valor general, pero no merece puente hasta consolidar shortlist y evidencia",
-            bridge_blockers=("todavía fuera de shortlist general", "evidencia insuficiente"),
-            conceptual_role_fit=(ROUTING_STACK_FIT_GRANITE,),
-            conceptual_fit_reason="aporta criterio útil sobre el flujo primary conversacional",
-            bridge_rehearsal_status=ROUTING_REHEARSAL_DEFERRED,
-            rehearsal_priority=ROUTING_REVIEW_PRIORITY_MEDIUM,
-            rehearsal_rationale="todavía conviene consolidar evidencia y shortlist antes del rehearsal",
-            rehearsal_blockers=("confianza todavía no sostenida", "evidencia todavía escasa"),
-            cutover_readiness=ROUTING_CUTOVER_WATCH,
-            cutover_rationale="todavía conviene observarla para cutover, pero primero debe fortalecer el rehearsal",
-            rollback_concerns=("evidencia todavía escasa",),
-            action_suggestion="collect_more_bridge_evidence",
-        )
-        noise_candidate = replace(
-            noise_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            global_routing_score=0.43,
-            confidence_tier=ROUTING_CONFIDENCE_EARLY_SIGNAL,
-            stability_label=ROUTING_STABILITY_DEGRADING,
-            readiness_band=ROUTING_READINESS_NOT_READY,
-            readiness_reason="todavía arrastra ruido operativo",
-            curation_status=ROUTING_CURATION_DISCARDABLE,
-            curation_reason="ya acumula ruido o desgaste suficiente como para salir del foco principal",
-            selection_status=ROUTING_SELECTION_DISCARDABLE,
-            selection_reason="conviene sacarla del foco principal hasta que muestre señal nueva",
-            influence_readiness="not_ready",
-            influence_reason="todavía no conviene empujar influencia adicional",
-            bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_NOT_CONSIDERED,
-            bridge_priority="none",
-            bridge_rationale="todavía no tiene base suficiente para entrar en el preflight del puente",
-            bridge_blockers=("valor operativo insuficiente",),
-            conceptual_role_fit=(ROUTING_STACK_FIT_NEUTRAL,),
-            conceptual_fit_reason="todavía no se ve un mapeo claro al stack verde",
-            bridge_rehearsal_status=ROUTING_REHEARSAL_NOT_IN_REHEARSAL,
-            rehearsal_priority="none",
-            rehearsal_rationale="todavía no tiene base suficiente para entrar al rehearsal del puente",
-            rehearsal_blockers=("fuera de shortlist general",),
-            cutover_readiness=ROUTING_CUTOVER_NOT_READY,
-            cutover_rationale="todavía no tiene base suficiente para una evaluación de go/no-go",
-            rollback_concerns=("fit conceptual ambiguo", "valor poco portable fuera del contexto actual"),
-            discardable_flag=True,
-            watch_status=True,
-            watch_reason="seguimiento sin mejora",
-            review_status=REVIEW_STATUS_STALE,
-            review_reason="seguimiento sin mejora",
-            action_outcome=ACTION_OUTCOME_NO_CLEAR_CHANGE,
-            action_suggestion="deprioritize_temporarily",
-        )
-        blocked_candidate = replace(
-            blocked_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            global_routing_score=0.74,
-            confidence_tier=ROUTING_CONFIDENCE_CONFIRMED_PATTERN,
-            stability_label=ROUTING_STABILITY_DEGRADING,
-            readiness_band=ROUTING_READINESS_EMERGING,
-            readiness_reason="ya muestra señal útil repetida y estable",
-            curation_status=ROUTING_CURATION_USEFUL,
-            curation_reason="ya muestra valor sostenido, pero todavía carga ruido administrativo",
-            selection_status=ROUTING_SELECTION_SHORTLISTED,
-            selection_reason="entró en shortlist por valor sostenido, pero todavía necesita limpieza adicional",
-            influence_readiness=ROUTING_INFLUENCE_SHORTLIST_READY,
-            influence_reason="ya merece shortlist operativa por valor sostenido y baja fricción",
-            bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_BLOCKED,
-            bridge_priority=ROUTING_REVIEW_PRIORITY_HIGH,
-            bridge_rationale="sirve para shortlist general, pero el puente queda bloqueado hasta cerrar ruido o riesgos",
-            bridge_blockers=("alertas recientes", "revisión todavía abierta"),
-            conceptual_role_fit=(ROUTING_STACK_FIT_GRANITE, ROUTING_STACK_FIT_OLMO),
-            conceptual_fit_reason="aporta criterio útil sobre el flujo primary conversacional / muestra afinidad con verificación o control crítico",
-            bridge_rehearsal_status=ROUTING_REHEARSAL_BLOCKED,
-            rehearsal_priority=ROUTING_REVIEW_PRIORITY_HIGH,
-            rehearsal_rationale="el rehearsal queda bloqueado mientras el preflight siga con riesgos abiertos",
-            rehearsal_blockers=("alertas recientes", "revisión todavía abierta"),
-            cutover_readiness=ROUTING_CUTOVER_BLOCKED,
-            cutover_rationale="el go/no-go sigue bloqueado porque rehearsal todavía no está limpio",
-            rollback_concerns=("ruido administrativo todavía abierto", "fragilidad operativa"),
-            alerts=("fragility_detected",),
-            review_status=REVIEW_STATUS_OPEN,
-            review_priority=ROUTING_REVIEW_PRIORITY_HIGH,
-            review_reason="alerta crítica todavía abierta",
-            action_suggestion="resolve_rehearsal_blockers",
-        )
-        registry = build_empty_routing_neuron_registry()
-        for candidate in (useful_candidate, observed_candidate, noise_candidate, blocked_candidate):
-            registry = registry.register_candidate(candidate)
-        registry = replace(
-            registry,
-            active={
-                useful_candidate.neuron_id: useful_candidate,
-                observed_candidate.neuron_id: observed_candidate,
-                noise_candidate.neuron_id: noise_candidate,
-                blocked_candidate.neuron_id: blocked_candidate,
-            },
-        )
+            useful_candidate = replace(
+                useful_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                global_routing_score=0.94,
+                confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
+                stability_label=ROUTING_STABILITY_STABLE,
+                successful_activations=6,
+                promotion_ready_signal=True,
+                readiness_band=ROUTING_READINESS_NEAR_READY,
+                readiness_reason="valor sostenido con poco ruido frente a baseline",
+                curation_status=ROUTING_CURATION_USEFUL,
+                curation_reason="ya muestra valor sostenido, buena higiene administrativa y poco ruido frente a baseline",
+                selection_status=ROUTING_SELECTION_SHORTLISTED,
+                selection_reason="entró en shortlist por valor sostenido, bajo ruido y señal de influencia útil",
+                influence_readiness=ROUTING_INFLUENCE_BRIDGE_WATCH,
+                influence_reason="ya merece entrar al puente conceptual hacia V0.39, aunque todavía sin promoción real",
+                bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_READY,
+                bridge_priority=ROUTING_REVIEW_PRIORITY_HIGH,
+                bridge_rationale="ya puede entrar a la bridge slate: valor sostenido, poco ruido y fit claro al stack verde",
+                bridge_blockers=(),
+                conceptual_role_fit=(ROUTING_STACK_FIT_SMOLLM2, ROUTING_STACK_FIT_GRANITE, ROUTING_STACK_FIT_OLMO),
+                conceptual_fit_reason="encaja como router o micro expert liviano / aporta criterio útil sobre el flujo primary conversacional / muestra afinidad con verificación o control crítico",
+                bridge_rehearsal_status=ROUTING_REHEARSAL_READY,
+                rehearsal_priority=ROUTING_REVIEW_PRIORITY_HIGH,
+                rehearsal_rationale="ya puede entrar a rehearsal: el preflight es robusto y la señal se sostiene con poco ruido",
+                rehearsal_blockers=(),
+                cutover_readiness=ROUTING_CUTOVER_GO_CANDIDATE,
+                cutover_rationale="ya merece un go/no-go administrativo favorable: rehearsal sólido, poco ruido y riesgos controlados",
+                rollback_concerns=(),
+                action_suggestion="review_bridge_readiness",
+                review_status=REVIEW_STATUS_RESOLVED,
+                alert_status=ALERT_STATUS_RESOLVED,
+                action_outcome=ACTION_OUTCOME_HELPED,
+            )
+            observed_candidate = replace(
+                observed_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                global_routing_score=0.69,
+                confidence_tier=ROUTING_CONFIDENCE_CONFIRMED_PATTERN,
+                stability_label=ROUTING_STABILITY_IMPROVING,
+                readiness_band=ROUTING_READINESS_EMERGING,
+                readiness_reason="ya muestra señal útil repetida y estable",
+                curation_status=ROUTING_CURATION_PROMISING,
+                curation_reason="ya tiene señales útiles, pero todavía necesita más observación antes de entrar en foco fuerte",
+                selection_status=ROUTING_SELECTION_OBSERVED_ONLY,
+                selection_reason="todavía conviene observarla antes de meterla en shortlist operativa",
+                influence_readiness=ROUTING_INFLUENCE_EMERGING,
+                influence_reason="todavía conviene mantenerla como señal útil en observación",
+                bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_DEFERRED,
+                bridge_priority=ROUTING_REVIEW_PRIORITY_MEDIUM,
+                bridge_rationale="todavía tiene valor general, pero no merece puente hasta consolidar shortlist y evidencia",
+                bridge_blockers=("todavía fuera de shortlist general", "evidencia insuficiente"),
+                conceptual_role_fit=(ROUTING_STACK_FIT_GRANITE,),
+                conceptual_fit_reason="aporta criterio útil sobre el flujo primary conversacional",
+                bridge_rehearsal_status=ROUTING_REHEARSAL_DEFERRED,
+                rehearsal_priority=ROUTING_REVIEW_PRIORITY_MEDIUM,
+                rehearsal_rationale="todavía conviene consolidar evidencia y shortlist antes del rehearsal",
+                rehearsal_blockers=("confianza todavía no sostenida", "evidencia todavía escasa"),
+                cutover_readiness=ROUTING_CUTOVER_WATCH,
+                cutover_rationale="todavía conviene observarla para cutover, pero primero debe fortalecer el rehearsal",
+                rollback_concerns=("evidencia todavía escasa",),
+                action_suggestion="collect_more_bridge_evidence",
+            )
+            noise_candidate = replace(
+                noise_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                global_routing_score=0.43,
+                confidence_tier=ROUTING_CONFIDENCE_EARLY_SIGNAL,
+                stability_label=ROUTING_STABILITY_DEGRADING,
+                readiness_band=ROUTING_READINESS_NOT_READY,
+                readiness_reason="todavía arrastra ruido operativo",
+                curation_status=ROUTING_CURATION_DISCARDABLE,
+                curation_reason="ya acumula ruido o desgaste suficiente como para salir del foco principal",
+                selection_status=ROUTING_SELECTION_DISCARDABLE,
+                selection_reason="conviene sacarla del foco principal hasta que muestre señal nueva",
+                influence_readiness="not_ready",
+                influence_reason="todavía no conviene empujar influencia adicional",
+                bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_NOT_CONSIDERED,
+                bridge_priority="none",
+                bridge_rationale="todavía no tiene base suficiente para entrar en el preflight del puente",
+                bridge_blockers=("valor operativo insuficiente",),
+                conceptual_role_fit=(ROUTING_STACK_FIT_NEUTRAL,),
+                conceptual_fit_reason="todavía no se ve un mapeo claro al stack verde",
+                bridge_rehearsal_status=ROUTING_REHEARSAL_NOT_IN_REHEARSAL,
+                rehearsal_priority="none",
+                rehearsal_rationale="todavía no tiene base suficiente para entrar al rehearsal del puente",
+                rehearsal_blockers=("fuera de shortlist general",),
+                cutover_readiness=ROUTING_CUTOVER_NOT_READY,
+                cutover_rationale="todavía no tiene base suficiente para una evaluación de go/no-go",
+                rollback_concerns=("fit conceptual ambiguo", "valor poco portable fuera del contexto actual"),
+                discardable_flag=True,
+                watch_status=True,
+                watch_reason="seguimiento sin mejora",
+                review_status=REVIEW_STATUS_STALE,
+                review_reason="seguimiento sin mejora",
+                action_outcome=ACTION_OUTCOME_NO_CLEAR_CHANGE,
+                action_suggestion="deprioritize_temporarily",
+            )
+            blocked_candidate = replace(
+                blocked_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                global_routing_score=0.74,
+                confidence_tier=ROUTING_CONFIDENCE_CONFIRMED_PATTERN,
+                stability_label=ROUTING_STABILITY_DEGRADING,
+                readiness_band=ROUTING_READINESS_EMERGING,
+                readiness_reason="ya muestra señal útil repetida y estable",
+                curation_status=ROUTING_CURATION_USEFUL,
+                curation_reason="ya muestra valor sostenido, pero todavía carga ruido administrativo",
+                selection_status=ROUTING_SELECTION_SHORTLISTED,
+                selection_reason="entró en shortlist por valor sostenido, pero todavía necesita limpieza adicional",
+                influence_readiness=ROUTING_INFLUENCE_SHORTLIST_READY,
+                influence_reason="ya merece shortlist operativa por valor sostenido y baja fricción",
+                bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_BLOCKED,
+                bridge_priority=ROUTING_REVIEW_PRIORITY_HIGH,
+                bridge_rationale="sirve para shortlist general, pero el puente queda bloqueado hasta cerrar ruido o riesgos",
+                bridge_blockers=("alertas recientes", "revisión todavía abierta"),
+                conceptual_role_fit=(ROUTING_STACK_FIT_GRANITE, ROUTING_STACK_FIT_OLMO),
+                conceptual_fit_reason="aporta criterio útil sobre el flujo primary conversacional / muestra afinidad con verificación o control crítico",
+                bridge_rehearsal_status=ROUTING_REHEARSAL_BLOCKED,
+                rehearsal_priority=ROUTING_REVIEW_PRIORITY_HIGH,
+                rehearsal_rationale="el rehearsal queda bloqueado mientras el preflight siga con riesgos abiertos",
+                rehearsal_blockers=("alertas recientes", "revisión todavía abierta"),
+                cutover_readiness=ROUTING_CUTOVER_BLOCKED,
+                cutover_rationale="el go/no-go sigue bloqueado porque rehearsal todavía no está limpio",
+                rollback_concerns=("ruido administrativo todavía abierto", "fragilidad operativa"),
+                alerts=("fragility_detected",),
+                review_status=REVIEW_STATUS_OPEN,
+                review_priority=ROUTING_REVIEW_PRIORITY_HIGH,
+                review_reason="alerta crítica todavía abierta",
+                action_suggestion="resolve_rehearsal_blockers",
+            )
+            registry = build_empty_routing_neuron_registry()
+            for candidate in (useful_candidate, observed_candidate, noise_candidate, blocked_candidate):
+                registry = registry.register_candidate(candidate)
+            registry = replace(
+                registry,
+                active={
+                    useful_candidate.neuron_id: useful_candidate,
+                    observed_candidate.neuron_id: observed_candidate,
+                    noise_candidate.neuron_id: noise_candidate,
+                    blocked_candidate.neuron_id: blocked_candidate,
+                },
+            )
 
-        useful_result = self._run_turn(
-            "que neuronas son las mas utiles",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        shortlist_result = self._run_turn(
-            "que neuronas entraron en la shortlist",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        noise_result = self._run_turn(
-            "que neuronas siguen siendo ruido",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        bridge_result = self._run_turn(
-            "que neuronas se estan acercando al puente de v0.39",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        bridge_ready_result = self._run_turn(
-            "que neuronas estan listas para el puente",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        bridge_blocked_result = self._run_turn(
-            "que neuronas quedaron bloqueadas para v0.39",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        bridge_deferred_result = self._run_turn(
-            "que neuronas estan diferidas",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        bridge_fit_result = self._run_turn(
-            "que neuronas tienen mejor compatibilidad con el stack verde",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        rehearsal_result = self._run_turn(
-            "muestra la rehearsal slate",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        rehearsal_ready_result = self._run_turn(
-            "que neuronas estan listas para rehearsal",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        near_go_result = self._run_turn(
-            "que neuronas estan mas cerca del go",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        rollback_result = self._run_turn(
-            "que neuronas tienen riesgos de rollback",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        explanation_result = self._run_turn(
-            f"por que la neurona {useful_candidate.neuron_id} fue seleccionada",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        bridge_reason_result = self._run_turn(
-            f"por que la neurona {observed_candidate.neuron_id} no entra al puente",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        cutover_reason_result = self._run_turn(
-            f"por que la neurona {observed_candidate.neuron_id} todavia no entra al go/no-go",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        state_result = self._run_turn(
-            "que estado tienes",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
+            useful_result = self._run_turn(
+                "que neuronas son las mas utiles",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            shortlist_result = self._run_turn(
+                "que neuronas entraron en la shortlist",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            noise_result = self._run_turn(
+                "que neuronas siguen siendo ruido",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            bridge_result = self._run_turn(
+                "que neuronas se estan acercando al puente de v0.39",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            bridge_ready_result = self._run_turn(
+                "que neuronas estan listas para el puente",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            bridge_blocked_result = self._run_turn(
+                "que neuronas quedaron bloqueadas para v0.39",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            bridge_deferred_result = self._run_turn(
+                "que neuronas estan diferidas",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            bridge_fit_result = self._run_turn(
+                "que neuronas tienen mejor compatibilidad con el stack verde",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            rehearsal_result = self._run_turn(
+                "muestra la rehearsal slate",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            rehearsal_ready_result = self._run_turn(
+                "que neuronas estan listas para rehearsal",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            near_go_result = self._run_turn(
+                "que neuronas estan mas cerca del go",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            rollback_result = self._run_turn(
+                "que neuronas tienen riesgos de rollback",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            explanation_result = self._run_turn(
+                f"por que la neurona {useful_candidate.neuron_id} fue seleccionada",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            bridge_reason_result = self._run_turn(
+                f"por que la neurona {observed_candidate.neuron_id} no entra al puente",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            cutover_reason_result = self._run_turn(
+                f"por que la neurona {observed_candidate.neuron_id} todavia no entra al go/no-go",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            state_result = self._run_turn(
+                "que estado tienes",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
 
-        for result in (
-            useful_result,
-            shortlist_result,
-            noise_result,
-            bridge_result,
-            bridge_ready_result,
-            bridge_blocked_result,
-            bridge_deferred_result,
-            bridge_fit_result,
-            rehearsal_result,
-            rehearsal_ready_result,
-            near_go_result,
-            rollback_result,
-            explanation_result,
-            bridge_reason_result,
-            cutover_reason_result,
-        ):
-            self.assertEqual(result.metadata.route, "system_state")
-            self.assertFalse(result.metadata.used_model)
+            for result in (
+                useful_result,
+                shortlist_result,
+                noise_result,
+                bridge_result,
+                bridge_ready_result,
+                bridge_blocked_result,
+                bridge_deferred_result,
+                bridge_fit_result,
+                rehearsal_result,
+                rehearsal_ready_result,
+                near_go_result,
+                rollback_result,
+                explanation_result,
+                bridge_reason_result,
+                cutover_reason_result,
+            ):
+                self.assertEqual(result.metadata.route, "system_state")
+                self.assertFalse(result.metadata.used_model)
 
-        self.assertIn(useful_candidate.neuron_id, useful_result.response)
-        self.assertIn(useful_candidate.neuron_id, shortlist_result.response)
-        self.assertIn(noise_candidate.neuron_id, noise_result.response)
-        self.assertIn(useful_candidate.neuron_id, bridge_result.response)
-        self.assertIn(useful_candidate.neuron_id, bridge_ready_result.response)
-        self.assertIn(blocked_candidate.neuron_id, bridge_blocked_result.response)
-        self.assertIn(observed_candidate.neuron_id, bridge_deferred_result.response)
-        self.assertIn(useful_candidate.neuron_id, bridge_fit_result.response)
-        self.assertIn(useful_candidate.neuron_id, rehearsal_result.response)
-        self.assertIn(useful_candidate.neuron_id, rehearsal_ready_result.response)
-        self.assertIn(useful_candidate.neuron_id, near_go_result.response)
-        self.assertIn(blocked_candidate.neuron_id, rollback_result.response)
-        self.assertIn("quedó seleccionada para shortlist", explanation_result.response)
-        self.assertIn("no entra todavía al puente", bridge_reason_result.response)
-        self.assertIn("blockers", bridge_reason_result.response)
-        self.assertIn("todavía no llega a near_go", cutover_reason_result.response)
-        self.assertIn("riesgos", cutover_reason_result.response)
-        self.assertIn("shortlist", state_result.response)
-        self.assertIn("listas", state_result.response)
-        self.assertIn("bloqueadas", state_result.response)
-        self.assertIn("diferidas", state_result.response)
-        self.assertIn("rehearsal", state_result.response)
-        self.assertIn("near-go", state_result.response)
-        self.assertIn("go", state_result.response)
-        self.assertIn("riesgos", state_result.response)
-        self.assertIn("descartables", state_result.response)
-        self.assertIn("puente", state_result.response)
+            self.assertIn(useful_candidate.neuron_id, useful_result.response)
+            self.assertIn(useful_candidate.neuron_id, shortlist_result.response)
+            self.assertIn(noise_candidate.neuron_id, noise_result.response)
+            self.assertIn(useful_candidate.neuron_id, bridge_result.response)
+            self.assertIn(useful_candidate.neuron_id, bridge_ready_result.response)
+            self.assertIn(blocked_candidate.neuron_id, bridge_blocked_result.response)
+            self.assertIn(observed_candidate.neuron_id, bridge_deferred_result.response)
+            self.assertIn(useful_candidate.neuron_id, bridge_fit_result.response)
+            self.assertIn(useful_candidate.neuron_id, rehearsal_result.response)
+            self.assertIn(useful_candidate.neuron_id, rehearsal_ready_result.response)
+            self.assertIn(useful_candidate.neuron_id, near_go_result.response)
+            self.assertIn(blocked_candidate.neuron_id, rollback_result.response)
+            self.assertIn("quedó seleccionada para shortlist", explanation_result.response)
+            self.assertIn("no entra todavía al puente", bridge_reason_result.response)
+            self.assertIn("blockers", bridge_reason_result.response)
+            self.assertIn("todavía no llega a near_go", cutover_reason_result.response)
+            self.assertIn("riesgos", cutover_reason_result.response)
+            self.assertIn("shortlist", state_result.response)
+            self.assertIn("listas", state_result.response)
+            self.assertIn("bloqueadas", state_result.response)
+            self.assertIn("diferidas", state_result.response)
+            self.assertIn("rehearsal", state_result.response)
+            self.assertIn("near-go", state_result.response)
+            self.assertIn("go", state_result.response)
+            self.assertIn("riesgos", state_result.response)
+            self.assertIn("descartables", state_result.response)
+            self.assertIn("puente", state_result.response)
 
     def test_routing_maintenance_builds_bridge_preflight_statuses(self) -> None:
         ready_candidate = register_routing_neuron_candidate(
