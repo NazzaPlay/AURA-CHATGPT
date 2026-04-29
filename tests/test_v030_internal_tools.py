@@ -4641,128 +4641,129 @@ class AuraV036CoreTest(unittest.TestCase):
             self.assertIn("fallback no_match", activity_result.response)
 
     def test_system_state_admin_queries_expose_routing_neuron_repertoire(self) -> None:
-        active_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_explain:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3", "ok-4", "ok-5"),
-            failure_history=(),
-            expected_gain=0.24,
-            estimated_cost=0.12,
-            estimated_latency=70.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        paused_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_explain:model",
-            activated_components=("primary", "critic"),
-            activation_rule="compact_before_primary",
-            routing_condition="technical_reasoning low",
-            intermediate_transform="compacta el contexto antes de responder",
-            success_history=("ok-1", "ok-2"),
-            failure_history=("fail-1", "fail-2"),
-            expected_gain=0.09,
-            estimated_cost=0.25,
-            estimated_latency=110.0,
-            neuron_type=ROUTING_TYPE_TRANSFORMATION,
-        )
-        self.assertIsNotNone(active_candidate)
-        self.assertIsNotNone(paused_candidate)
-        active_candidate = replace(
-            active_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            global_routing_score=0.88,
-            confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
-            stability_label=ROUTING_STABILITY_STABLE,
-            successful_activations=5,
-            failed_activations=0,
-            stable_activation_streak=3,
-            promotion_ready_signal=True,
-            readiness_band=ROUTING_READINESS_NEAR_READY,
-            readiness_reason="valor sostenido con poco ruido frente a baseline",
-            last_decision="applied",
-        )
-        paused_candidate = replace(
-            paused_candidate,
-            neuron_state=ROUTING_STATE_PAUSED,
-            global_routing_score=0.41,
-            confidence_tier=ROUTING_CONFIDENCE_CONFIRMED_PATTERN,
-            stability_label=ROUTING_STABILITY_FRAGILE,
-            failed_activations=2,
-            recent_fallback_count=2,
-            alerts=("fragility_detected",),
-            readiness_band=ROUTING_READINESS_NOT_READY,
-            readiness_reason="pausada por inestabilidad o revisión",
-            last_decision="paused",
-        )
-        registry = build_empty_routing_neuron_registry().register_candidate(active_candidate)
-        registry = registry.register_candidate(paused_candidate)
-        registry = replace(
-            registry,
-            active={active_candidate.neuron_id: active_candidate},
-            conflict_log=(f"session-admin:{active_candidate.neuron_id}>{paused_candidate.neuron_id}",),
-            alerts=(f"{paused_candidate.neuron_id}:inestable",),
-        )
-        registry = registry.register_recommendation(
-            RoutingPromotionRecommendation(
-                neuron_id=active_candidate.neuron_id,
-                recommended_stage=PROMOTION_STAGE_ADAPTER,
-                reason="valor sostenido y buena estabilidad",
-                confidence="high",
+        with _codex_registry_mocks():
+            active_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_explain:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3", "ok-4", "ok-5"),
+                failure_history=(),
+                expected_gain=0.24,
+                estimated_cost=0.12,
+                estimated_latency=70.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
             )
-        )
+            paused_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_explain:model",
+                activated_components=("primary", "critic"),
+                activation_rule="compact_before_primary",
+                routing_condition="technical_reasoning low",
+                intermediate_transform="compacta el contexto antes de responder",
+                success_history=("ok-1", "ok-2"),
+                failure_history=("fail-1", "fail-2"),
+                expected_gain=0.09,
+                estimated_cost=0.25,
+                estimated_latency=110.0,
+                neuron_type=ROUTING_TYPE_TRANSFORMATION,
+            )
+            self.assertIsNotNone(active_candidate)
+            self.assertIsNotNone(paused_candidate)
+            active_candidate = replace(
+                active_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                global_routing_score=0.88,
+                confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
+                stability_label=ROUTING_STABILITY_STABLE,
+                successful_activations=5,
+                failed_activations=0,
+                stable_activation_streak=3,
+                promotion_ready_signal=True,
+                readiness_band=ROUTING_READINESS_NEAR_READY,
+                readiness_reason="valor sostenido con poco ruido frente a baseline",
+                last_decision="applied",
+            )
+            paused_candidate = replace(
+                paused_candidate,
+                neuron_state=ROUTING_STATE_PAUSED,
+                global_routing_score=0.41,
+                confidence_tier=ROUTING_CONFIDENCE_CONFIRMED_PATTERN,
+                stability_label=ROUTING_STABILITY_FRAGILE,
+                failed_activations=2,
+                recent_fallback_count=2,
+                alerts=("fragility_detected",),
+                readiness_band=ROUTING_READINESS_NOT_READY,
+                readiness_reason="pausada por inestabilidad o revisión",
+                last_decision="paused",
+            )
+            registry = build_empty_routing_neuron_registry().register_candidate(active_candidate)
+            registry = registry.register_candidate(paused_candidate)
+            registry = replace(
+                registry,
+                active={active_candidate.neuron_id: active_candidate},
+                conflict_log=(f"session-admin:{active_candidate.neuron_id}>{paused_candidate.neuron_id}",),
+                alerts=(f"{paused_candidate.neuron_id}:inestable",),
+            )
+            registry = registry.register_recommendation(
+                RoutingPromotionRecommendation(
+                    neuron_id=active_candidate.neuron_id,
+                    recommended_stage=PROMOTION_STAGE_ADAPTER,
+                    reason="valor sostenido y buena estabilidad",
+                    confidence="high",
+                )
+            )
 
-        recent_result = self._run_turn(
-            "muestra actividad reciente de routing neuron",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        active_result = self._run_turn(
-            "que neuronas tienes activas",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        paused_result = self._run_turn(
-            "que neuronas estan pausadas",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        alerts_result = self._run_turn(
-            "que neuronas tienen alertas",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        score_result = self._run_turn(
-            "que neuronas tienen mejor score",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        readiness_result = self._run_turn(
-            "que neuronas se estan acercando a promocion",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
+            recent_result = self._run_turn(
+                "muestra actividad reciente de routing neuron",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            active_result = self._run_turn(
+                "que neuronas tienes activas",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            paused_result = self._run_turn(
+                "que neuronas estan pausadas",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            alerts_result = self._run_turn(
+                "que neuronas tienen alertas",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            score_result = self._run_turn(
+                "que neuronas tienen mejor score",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            readiness_result = self._run_turn(
+                "que neuronas se estan acercando a promocion",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
 
-        for result in (
-            recent_result,
-            active_result,
-            paused_result,
-            alerts_result,
-            score_result,
-            readiness_result,
-        ):
-            self.assertEqual(result.metadata.route, "system_state")
-            self.assertFalse(result.metadata.used_model)
+            for result in (
+                recent_result,
+                active_result,
+                paused_result,
+                alerts_result,
+                score_result,
+                readiness_result,
+            ):
+                self.assertEqual(result.metadata.route, "system_state")
+                self.assertFalse(result.metadata.used_model)
 
-        self.assertIn(active_candidate.neuron_id, recent_result.response)
-        self.assertIn(active_candidate.neuron_id, active_result.response)
-        self.assertIn(paused_candidate.neuron_id, paused_result.response)
-        self.assertIn("alertas", alerts_result.response)
-        self.assertIn(active_candidate.neuron_id, score_result.response)
-        self.assertIn("eff", score_result.response)
-        self.assertIn("readiness near_ready", readiness_result.response)
-        self.assertIn("motivo", readiness_result.response)
+            self.assertIn(active_candidate.neuron_id, recent_result.response)
+            self.assertIn(active_candidate.neuron_id, active_result.response)
+            self.assertIn(paused_candidate.neuron_id, paused_result.response)
+            self.assertIn("alertas", alerts_result.response)
+            self.assertIn(active_candidate.neuron_id, score_result.response)
+            self.assertIn("eff", score_result.response)
+            self.assertIn("readiness near_ready", readiness_result.response)
+            self.assertIn("motivo", readiness_result.response)
 
     def test_routing_maintenance_builds_review_priority_and_action_suggestion(self) -> None:
         candidate = register_routing_neuron_candidate(
