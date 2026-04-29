@@ -6353,229 +6353,230 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertNotIn(rejected_entry.neuron_id, snapshot.launch_slate_ids)
 
     def test_system_state_admin_queries_expose_launch_dossier_and_cutover_plan(self) -> None:
-        approved_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:state_launch_approved:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
-            failure_history=(),
-            expected_gain=0.3,
-            estimated_cost=0.06,
-            estimated_latency=47.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        support_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:state_launch_support:model",
-            activated_components=("primary", "memory"),
-            activation_rule="compact_context_before_answer",
-            routing_condition="compact_context_before_answer",
-            intermediate_transform="compacta el contexto antes de responder",
-            success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
-            failure_history=(),
-            expected_gain=0.22,
-            estimated_cost=0.08,
-            estimated_latency=55.0,
-            neuron_type=ROUTING_TYPE_TRANSFORMATION,
-        )
-        hold_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:state_launch_hold:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
-            failure_history=(),
-            expected_gain=0.24,
-            estimated_cost=0.08,
-            estimated_latency=58.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        rejected_candidate = register_routing_neuron_candidate(
-            task_signature="maintenance_routing:state_launch_rejected:model",
-            activated_components=("memory", "maintenance"),
-            activation_rule="summarize_recent_logs",
-            routing_condition="observe_recent_context",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2"),
-            failure_history=(),
-            expected_gain=0.08,
-            estimated_cost=0.11,
-            estimated_latency=74.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        self.assertIsNotNone(approved_candidate)
-        self.assertIsNotNone(support_candidate)
-        self.assertIsNotNone(hold_candidate)
-        self.assertIsNotNone(rejected_candidate)
+        with _codex_registry_mocks():
+            approved_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:state_launch_approved:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
+                failure_history=(),
+                expected_gain=0.3,
+                estimated_cost=0.06,
+                estimated_latency=47.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            support_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:state_launch_support:model",
+                activated_components=("primary", "memory"),
+                activation_rule="compact_context_before_answer",
+                routing_condition="compact_context_before_answer",
+                intermediate_transform="compacta el contexto antes de responder",
+                success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
+                failure_history=(),
+                expected_gain=0.22,
+                estimated_cost=0.08,
+                estimated_latency=55.0,
+                neuron_type=ROUTING_TYPE_TRANSFORMATION,
+            )
+            hold_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:state_launch_hold:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
+                failure_history=(),
+                expected_gain=0.24,
+                estimated_cost=0.08,
+                estimated_latency=58.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            rejected_candidate = register_routing_neuron_candidate(
+                task_signature="maintenance_routing:state_launch_rejected:model",
+                activated_components=("memory", "maintenance"),
+                activation_rule="summarize_recent_logs",
+                routing_condition="observe_recent_context",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2"),
+                failure_history=(),
+                expected_gain=0.08,
+                estimated_cost=0.11,
+                estimated_latency=74.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            self.assertIsNotNone(approved_candidate)
+            self.assertIsNotNone(support_candidate)
+            self.assertIsNotNone(hold_candidate)
+            self.assertIsNotNone(rejected_candidate)
 
-        approved_candidate = replace(
-            approved_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            global_routing_score=0.9,
-            confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
-            stability_label=ROUTING_STABILITY_STABLE,
-            selection_status=ROUTING_SELECTION_SHORTLISTED,
-            bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_READY,
-            bridge_rehearsal_status=ROUTING_REHEARSAL_READY,
-            cutover_readiness=ROUTING_CUTOVER_GO_CANDIDATE,
-            launch_status=ROUTING_LAUNCH_APPROVED,
-            launch_rationale="ya puede entrar al paquete final de cutover con rol claro y riesgos controlados",
-            cutover_role=ROUTING_ROLE_ROUTER_SUPPORT,
-            cutover_role_reason="encaja como apoyo de routing liviano o micro expert del stack verde",
-            activation_order=1,
-            activation_order_reason="entra primero dentro del núcleo aprobado del cutover",
-            dependency_hints=("requires migration_guard baseline checks",),
-            rollback_triggers=("quality drift after launch",),
-            fallback_target="baseline_primary_then_critic",
-            safe_reversion="volver a baseline_primary_then_critic y sacar la neurona del cutover packet",
-            no_go_conditions=(),
-        )
-        support_candidate = replace(
-            support_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            global_routing_score=0.79,
-            confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
-            stability_label=ROUTING_STABILITY_IMPROVING,
-            selection_status=ROUTING_SELECTION_SHORTLISTED,
-            bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_READY,
-            bridge_rehearsal_status=ROUTING_REHEARSAL_READY,
-            cutover_readiness=ROUTING_CUTOVER_NEAR_GO,
-            launch_status=ROUTING_LAUNCH_SUPPORT_ONLY,
-            launch_rationale="ya aporta valor como apoyo del cutover, aunque todavía no conviene ponerla en el núcleo",
-            cutover_role=ROUTING_ROLE_CONTEXT_FILTER,
-            cutover_role_reason="aporta una transformación o filtro previo útil para un cutover controlado",
-            activation_order=2,
-            activation_order_reason="entra después del núcleo aprobado porque cumple un rol de apoyo",
-            dependency_hints=("should enter before primary_support",),
-            rollback_triggers=("quality drift after launch",),
-            fallback_target="baseline_primary_only",
-            safe_reversion="volver a baseline_primary_only y sacar la neurona del cutover packet",
-            no_go_conditions=(),
-        )
-        hold_candidate = replace(
-            hold_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            global_routing_score=0.8,
-            confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
-            stability_label=ROUTING_STABILITY_STABLE,
-            selection_status=ROUTING_SELECTION_SHORTLISTED,
-            bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_READY,
-            bridge_rehearsal_status=ROUTING_REHEARSAL_READY,
-            cutover_readiness=ROUTING_CUTOVER_NEAR_GO,
-            launch_status=ROUTING_LAUNCH_HOLD,
-            launch_rationale="ya está cerca del go, pero todavía faltan señales o limpieza para aprobarla en la ola final",
-            cutover_role=ROUTING_ROLE_ROUTER_SUPPORT,
-            no_go_conditions=("close_cutover_gaps",),
-            rollback_concerns=("dependencia excesiva del baseline actual",),
-        )
-        rejected_candidate = replace(
-            rejected_candidate,
-            neuron_state=ROUTING_STATE_CANDIDATE,
-            global_routing_score=0.36,
-            confidence_tier=ROUTING_CONFIDENCE_EARLY_SIGNAL,
-            stability_label=ROUTING_STABILITY_DEGRADING,
-            selection_status=ROUTING_SELECTION_OBSERVED_ONLY,
-            cutover_readiness=ROUTING_CUTOVER_NOT_READY,
-            launch_status=ROUTING_LAUNCH_REJECTED,
-            launch_rationale="por ahora sirve como observación o rehearsal, pero no para el paquete final de V0.39",
-            no_go_conditions=("launch packet not justified",),
-            rollback_concerns=("fit conceptual ambiguo",),
-        )
+            approved_candidate = replace(
+                approved_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                global_routing_score=0.9,
+                confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
+                stability_label=ROUTING_STABILITY_STABLE,
+                selection_status=ROUTING_SELECTION_SHORTLISTED,
+                bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_READY,
+                bridge_rehearsal_status=ROUTING_REHEARSAL_READY,
+                cutover_readiness=ROUTING_CUTOVER_GO_CANDIDATE,
+                launch_status=ROUTING_LAUNCH_APPROVED,
+                launch_rationale="ya puede entrar al paquete final de cutover con rol claro y riesgos controlados",
+                cutover_role=ROUTING_ROLE_ROUTER_SUPPORT,
+                cutover_role_reason="encaja como apoyo de routing liviano o micro expert del stack verde",
+                activation_order=1,
+                activation_order_reason="entra primero dentro del núcleo aprobado del cutover",
+                dependency_hints=("requires migration_guard baseline checks",),
+                rollback_triggers=("quality drift after launch",),
+                fallback_target="baseline_primary_then_critic",
+                safe_reversion="volver a baseline_primary_then_critic y sacar la neurona del cutover packet",
+                no_go_conditions=(),
+            )
+            support_candidate = replace(
+                support_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                global_routing_score=0.79,
+                confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
+                stability_label=ROUTING_STABILITY_IMPROVING,
+                selection_status=ROUTING_SELECTION_SHORTLISTED,
+                bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_READY,
+                bridge_rehearsal_status=ROUTING_REHEARSAL_READY,
+                cutover_readiness=ROUTING_CUTOVER_NEAR_GO,
+                launch_status=ROUTING_LAUNCH_SUPPORT_ONLY,
+                launch_rationale="ya aporta valor como apoyo del cutover, aunque todavía no conviene ponerla en el núcleo",
+                cutover_role=ROUTING_ROLE_CONTEXT_FILTER,
+                cutover_role_reason="aporta una transformación o filtro previo útil para un cutover controlado",
+                activation_order=2,
+                activation_order_reason="entra después del núcleo aprobado porque cumple un rol de apoyo",
+                dependency_hints=("should enter before primary_support",),
+                rollback_triggers=("quality drift after launch",),
+                fallback_target="baseline_primary_only",
+                safe_reversion="volver a baseline_primary_only y sacar la neurona del cutover packet",
+                no_go_conditions=(),
+            )
+            hold_candidate = replace(
+                hold_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                global_routing_score=0.8,
+                confidence_tier=ROUTING_CONFIDENCE_SUSTAINED_VALUE,
+                stability_label=ROUTING_STABILITY_STABLE,
+                selection_status=ROUTING_SELECTION_SHORTLISTED,
+                bridge_preflight_status=ROUTING_BRIDGE_PREFLIGHT_READY,
+                bridge_rehearsal_status=ROUTING_REHEARSAL_READY,
+                cutover_readiness=ROUTING_CUTOVER_NEAR_GO,
+                launch_status=ROUTING_LAUNCH_HOLD,
+                launch_rationale="ya está cerca del go, pero todavía faltan señales o limpieza para aprobarla en la ola final",
+                cutover_role=ROUTING_ROLE_ROUTER_SUPPORT,
+                no_go_conditions=("close_cutover_gaps",),
+                rollback_concerns=("dependencia excesiva del baseline actual",),
+            )
+            rejected_candidate = replace(
+                rejected_candidate,
+                neuron_state=ROUTING_STATE_CANDIDATE,
+                global_routing_score=0.36,
+                confidence_tier=ROUTING_CONFIDENCE_EARLY_SIGNAL,
+                stability_label=ROUTING_STABILITY_DEGRADING,
+                selection_status=ROUTING_SELECTION_OBSERVED_ONLY,
+                cutover_readiness=ROUTING_CUTOVER_NOT_READY,
+                launch_status=ROUTING_LAUNCH_REJECTED,
+                launch_rationale="por ahora sirve como observación o rehearsal, pero no para el paquete final de V0.39",
+                no_go_conditions=("launch packet not justified",),
+                rollback_concerns=("fit conceptual ambiguo",),
+            )
 
-        registry = build_empty_routing_neuron_registry()
-        for candidate in (approved_candidate, support_candidate, hold_candidate, rejected_candidate):
-            registry = registry.register_candidate(candidate)
-        registry = replace(
-            registry,
-            active={
-                approved_candidate.neuron_id: approved_candidate,
-                support_candidate.neuron_id: support_candidate,
-                hold_candidate.neuron_id: hold_candidate,
-            },
-        )
+            registry = build_empty_routing_neuron_registry()
+            for candidate in (approved_candidate, support_candidate, hold_candidate, rejected_candidate):
+                registry = registry.register_candidate(candidate)
+            registry = replace(
+                registry,
+                active={
+                    approved_candidate.neuron_id: approved_candidate,
+                    support_candidate.neuron_id: support_candidate,
+                    hold_candidate.neuron_id: hold_candidate,
+                },
+            )
 
-        launch_result = self._run_turn(
-            "muestra el launch dossier",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        approved_result = self._run_turn(
-            "que neuronas estan aprobadas para v0.39",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        support_result = self._run_turn(
-            "que neuronas quedaron support only",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        hold_result = self._run_turn(
-            "que neuronas estan on hold",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        rejected_result = self._run_turn(
-            "que neuronas fueron rechazadas",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        order_result = self._run_turn(
-            "que orden de entrada propone el cutover",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        rollback_plan_result = self._run_turn(
-            f"que rollback plan tiene la neurona {approved_candidate.neuron_id}",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        dependencies_result = self._run_turn(
-            f"que dependencias tiene la neurona {support_candidate.neuron_id}",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        launch_reason_result = self._run_turn(
-            f"por que la neurona {hold_candidate.neuron_id} quedo en hold",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        state_result = self._run_turn(
-            "que estado tienes",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
+            launch_result = self._run_turn(
+                "muestra el launch dossier",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            approved_result = self._run_turn(
+                "que neuronas estan aprobadas para v0.39",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            support_result = self._run_turn(
+                "que neuronas quedaron support only",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            hold_result = self._run_turn(
+                "que neuronas estan on hold",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            rejected_result = self._run_turn(
+                "que neuronas fueron rechazadas",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            order_result = self._run_turn(
+                "que orden de entrada propone el cutover",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            rollback_plan_result = self._run_turn(
+                f"que rollback plan tiene la neurona {approved_candidate.neuron_id}",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            dependencies_result = self._run_turn(
+                f"que dependencias tiene la neurona {support_candidate.neuron_id}",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            launch_reason_result = self._run_turn(
+                f"por que la neurona {hold_candidate.neuron_id} quedo en hold",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            state_result = self._run_turn(
+                "que estado tienes",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
 
-        for result in (
-            launch_result,
-            approved_result,
-            support_result,
-            hold_result,
-            rejected_result,
-            order_result,
-            rollback_plan_result,
-            dependencies_result,
-            launch_reason_result,
-        ):
-            self.assertEqual(result.metadata.route, "system_state")
-            self.assertFalse(result.metadata.used_model)
+            for result in (
+                launch_result,
+                approved_result,
+                support_result,
+                hold_result,
+                rejected_result,
+                order_result,
+                rollback_plan_result,
+                dependencies_result,
+                launch_reason_result,
+            ):
+                self.assertEqual(result.metadata.route, "system_state")
+                self.assertFalse(result.metadata.used_model)
 
-        self.assertIn(approved_candidate.neuron_id, launch_result.response)
-        self.assertIn("approved", launch_result.response)
-        self.assertIn(approved_candidate.neuron_id, approved_result.response)
-        self.assertIn(support_candidate.neuron_id, support_result.response)
-        self.assertIn(hold_candidate.neuron_id, hold_result.response)
-        self.assertIn(rejected_candidate.neuron_id, rejected_result.response)
-        self.assertIn(approved_candidate.neuron_id, order_result.response)
-        self.assertIn("fallback", rollback_plan_result.response)
-        self.assertIn("dependencias", dependencies_result.response.lower())
-        self.assertIn("quedó hold", launch_reason_result.response)
-        self.assertIn("approved", state_result.response)
-        self.assertIn("support", state_result.response)
-        self.assertIn("hold", state_result.response)
-        self.assertIn("rejected", state_result.response)
-        self.assertIn("dossier", state_result.response)
+            self.assertIn(approved_candidate.neuron_id, launch_result.response)
+            self.assertIn("approved", launch_result.response)
+            self.assertIn(approved_candidate.neuron_id, approved_result.response)
+            self.assertIn(support_candidate.neuron_id, support_result.response)
+            self.assertIn(hold_candidate.neuron_id, hold_result.response)
+            self.assertIn(rejected_candidate.neuron_id, rejected_result.response)
+            self.assertIn(approved_candidate.neuron_id, order_result.response)
+            self.assertIn("fallback", rollback_plan_result.response)
+            self.assertIn("dependencias", dependencies_result.response.lower())
+            self.assertIn("quedó hold", launch_reason_result.response)
+            self.assertIn("approved", state_result.response)
+            self.assertIn("support", state_result.response)
+            self.assertIn("hold", state_result.response)
+            self.assertIn("rejected", state_result.response)
+            self.assertIn("dossier", state_result.response)
 
     def test_system_state_launch_dossier_empty_is_valid_and_connected(self) -> None:
         result = self._run_turn(
