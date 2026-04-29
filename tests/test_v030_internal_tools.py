@@ -5022,164 +5022,165 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertEqual(reopened.alert_status, ALERT_STATUS_REOPENED)
 
     def test_system_state_admin_queries_expose_lifecycle_views(self) -> None:
-        open_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_explain:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3"),
-            failure_history=(),
-            expected_gain=0.12,
-            estimated_cost=0.15,
-            estimated_latency=85.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        resolved_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_explain:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3", "ok-4", "ok-5"),
-            failure_history=(),
-            expected_gain=0.23,
-            estimated_cost=0.1,
-            estimated_latency=60.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        stale_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_explain:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3"),
-            failure_history=("fail-1",),
-            expected_gain=0.1,
-            estimated_cost=0.2,
-            estimated_latency=90.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        reopened_candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_troubleshoot:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
-            failure_history=(),
-            expected_gain=0.14,
-            estimated_cost=0.14,
-            estimated_latency=72.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        self.assertIsNotNone(open_candidate)
-        self.assertIsNotNone(resolved_candidate)
-        self.assertIsNotNone(stale_candidate)
-        self.assertIsNotNone(reopened_candidate)
+        with _codex_registry_mocks():
+            open_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_explain:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3"),
+                failure_history=(),
+                expected_gain=0.12,
+                estimated_cost=0.15,
+                estimated_latency=85.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            resolved_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_explain:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3", "ok-4", "ok-5"),
+                failure_history=(),
+                expected_gain=0.23,
+                estimated_cost=0.1,
+                estimated_latency=60.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            stale_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_explain:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3"),
+                failure_history=("fail-1",),
+                expected_gain=0.1,
+                estimated_cost=0.2,
+                estimated_latency=90.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            reopened_candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_troubleshoot:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3", "ok-4"),
+                failure_history=(),
+                expected_gain=0.14,
+                estimated_cost=0.14,
+                estimated_latency=72.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            self.assertIsNotNone(open_candidate)
+            self.assertIsNotNone(resolved_candidate)
+            self.assertIsNotNone(stale_candidate)
+            self.assertIsNotNone(reopened_candidate)
 
-        open_candidate = replace(
-            open_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            review_status=REVIEW_STATUS_OPEN,
-            review_priority=ROUTING_REVIEW_PRIORITY_HIGH,
-            review_reason="requiere revisión abierta",
-            action_suggestion="review_readiness",
-        )
-        resolved_candidate = replace(
-            resolved_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            review_status=REVIEW_STATUS_RESOLVED,
-            alert_status=ALERT_STATUS_RESOLVED,
-            action_outcome=ACTION_OUTCOME_HELPED,
-            action_suggestion="no_action_needed",
-        )
-        stale_candidate = replace(
-            stale_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            review_status=REVIEW_STATUS_STALE,
-            watch_status=True,
-            watch_reason="seguimiento sin mejora",
-            action_outcome=ACTION_OUTCOME_NO_CLEAR_CHANGE,
-            action_suggestion="reassess_or_close_review",
-            review_priority=ROUTING_REVIEW_PRIORITY_MEDIUM,
-            review_reason="seguimiento sin mejora",
-        )
-        reopened_candidate = replace(
-            reopened_candidate,
-            neuron_state=ROUTING_STATE_ACTIVE,
-            alert_status=ALERT_STATUS_REOPENED,
-            alerts=("fragility_detected",),
-            review_status=REVIEW_STATUS_OPEN,
-            review_priority=ROUTING_REVIEW_PRIORITY_HIGH,
-            review_reason="alerta reabierta",
-        )
-        registry = build_empty_routing_neuron_registry()
-        for candidate in (open_candidate, resolved_candidate, stale_candidate, reopened_candidate):
-            registry = registry.register_candidate(candidate)
-        registry = replace(
-            registry,
-            active={
-                open_candidate.neuron_id: open_candidate,
-                resolved_candidate.neuron_id: resolved_candidate,
-                stale_candidate.neuron_id: stale_candidate,
-                reopened_candidate.neuron_id: reopened_candidate,
-            },
-            alerts=(f"{reopened_candidate.neuron_id}:fragility_detected",),
-            admin_log=(),
-        )
-        registry = registry.mark_watch(stale_candidate.neuron_id, "seguimiento sin mejora")
-        registry = registry.pause_candidate_administratively(open_candidate.neuron_id, "revision_manual")
-        registry = registry.resolve_alert(resolved_candidate.neuron_id, "alerta_resuelta")
-        registry = registry.update_last_admin_action_state(
-            resolved_candidate.neuron_id,
-            outcome=ACTION_OUTCOME_HELPED,
-            review_status=REVIEW_STATUS_RESOLVED,
-            alert_status=ALERT_STATUS_RESOLVED,
-        )
+            open_candidate = replace(
+                open_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                review_status=REVIEW_STATUS_OPEN,
+                review_priority=ROUTING_REVIEW_PRIORITY_HIGH,
+                review_reason="requiere revisión abierta",
+                action_suggestion="review_readiness",
+            )
+            resolved_candidate = replace(
+                resolved_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                review_status=REVIEW_STATUS_RESOLVED,
+                alert_status=ALERT_STATUS_RESOLVED,
+                action_outcome=ACTION_OUTCOME_HELPED,
+                action_suggestion="no_action_needed",
+            )
+            stale_candidate = replace(
+                stale_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                review_status=REVIEW_STATUS_STALE,
+                watch_status=True,
+                watch_reason="seguimiento sin mejora",
+                action_outcome=ACTION_OUTCOME_NO_CLEAR_CHANGE,
+                action_suggestion="reassess_or_close_review",
+                review_priority=ROUTING_REVIEW_PRIORITY_MEDIUM,
+                review_reason="seguimiento sin mejora",
+            )
+            reopened_candidate = replace(
+                reopened_candidate,
+                neuron_state=ROUTING_STATE_ACTIVE,
+                alert_status=ALERT_STATUS_REOPENED,
+                alerts=("fragility_detected",),
+                review_status=REVIEW_STATUS_OPEN,
+                review_priority=ROUTING_REVIEW_PRIORITY_HIGH,
+                review_reason="alerta reabierta",
+            )
+            registry = build_empty_routing_neuron_registry()
+            for candidate in (open_candidate, resolved_candidate, stale_candidate, reopened_candidate):
+                registry = registry.register_candidate(candidate)
+            registry = replace(
+                registry,
+                active={
+                    open_candidate.neuron_id: open_candidate,
+                    resolved_candidate.neuron_id: resolved_candidate,
+                    stale_candidate.neuron_id: stale_candidate,
+                    reopened_candidate.neuron_id: reopened_candidate,
+                },
+                alerts=(f"{reopened_candidate.neuron_id}:fragility_detected",),
+                admin_log=(),
+            )
+            registry = registry.mark_watch(stale_candidate.neuron_id, "seguimiento sin mejora")
+            registry = registry.pause_candidate_administratively(open_candidate.neuron_id, "revision_manual")
+            registry = registry.resolve_alert(resolved_candidate.neuron_id, "alerta_resuelta")
+            registry = registry.update_last_admin_action_state(
+                resolved_candidate.neuron_id,
+                outcome=ACTION_OUTCOME_HELPED,
+                review_status=REVIEW_STATUS_RESOLVED,
+                alert_status=ALERT_STATUS_RESOLVED,
+            )
 
-        open_result = self._run_turn(
-            "que revisiones siguen abiertas",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        resolved_result = self._run_turn(
-            "que revisiones ya se resolvieron",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        reopened_result = self._run_turn(
-            "que alertas se reabrieron",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        helped_result = self._run_turn(
-            "que acciones funcionaron",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
-        stale_result = self._run_turn(
-            "que items estan estancados",
-            memory={"name": "Ada"},
-            routing_registry=registry,
-        )
+            open_result = self._run_turn(
+                "que revisiones siguen abiertas",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            resolved_result = self._run_turn(
+                "que revisiones ya se resolvieron",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            reopened_result = self._run_turn(
+                "que alertas se reabrieron",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            helped_result = self._run_turn(
+                "que acciones funcionaron",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
+            stale_result = self._run_turn(
+                "que items estan estancados",
+                memory={"name": "Ada"},
+                routing_registry=registry,
+            )
 
-        for result in (
-            open_result,
-            resolved_result,
-            reopened_result,
-            helped_result,
-            stale_result,
-        ):
-            self.assertEqual(result.metadata.route, "system_state")
-            self.assertFalse(result.metadata.used_model)
+            for result in (
+                open_result,
+                resolved_result,
+                reopened_result,
+                helped_result,
+                stale_result,
+            ):
+                self.assertEqual(result.metadata.route, "system_state")
+                self.assertFalse(result.metadata.used_model)
 
-        self.assertIn(open_candidate.neuron_id, open_result.response)
-        self.assertIn(resolved_candidate.neuron_id, resolved_result.response)
-        self.assertIn(reopened_candidate.neuron_id, reopened_result.response)
-        self.assertIn(resolved_candidate.neuron_id, helped_result.response)
-        self.assertIn(stale_candidate.neuron_id, stale_result.response)
+            self.assertIn(open_candidate.neuron_id, open_result.response)
+            self.assertIn(resolved_candidate.neuron_id, resolved_result.response)
+            self.assertIn(reopened_candidate.neuron_id, reopened_result.response)
+            self.assertIn(resolved_candidate.neuron_id, helped_result.response)
+            self.assertIn(stale_candidate.neuron_id, stale_result.response)
 
     def test_routing_maintenance_curates_shortlist_and_discardables(self) -> None:
         useful_candidate = register_routing_neuron_candidate(
