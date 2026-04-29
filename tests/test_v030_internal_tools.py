@@ -313,13 +313,82 @@ def _build_fake_codex_registry() -> dict:
     }
 
 
+def build_codex_control_status_from_fake_for_tests() -> "CodexControlStatus":
+    """Construye un CodexControlStatus desde el fake registry para tests."""
+    from backend.app.routing_neuron.control import CodexControlStatus
+
+    fake = _build_fake_codex_registry()
+    latest = fake.get("latest", {})
+    entries = fake.get("entries", [])
+    entry = entries[0] if entries else {}
+    runtime_patterns = fake.get("runtime_patterns", {})
+    model_bank = fake.get("model_bank", {})
+
+    return CodexControlStatus(
+        registry_path="fake",
+        registry_version=fake.get("registry_version", "1.3"),
+        schema_version=fake.get("schema_version", "codex_control_registry.v1.3"),
+        entry_count=len(entries),
+        latest_run_id=latest.get("run_id"),
+        latest_timestamp=latest.get("timestamp"),
+        latest_version=latest.get("version_target"),
+        latest_status=latest.get("status"),
+        latest_work_type=latest.get("work_type"),
+        latest_requested_scope=latest.get("requested_scope"),
+        latest_summary="Codex registry fake: completed V0.39.6, health watch, risk medium",
+        latest_checkpoint="checkpoint fake H3.9D",
+        latest_checkpoint_short="checkpoint fake H3.9D",
+        latest_checkpoint_long="checkpoint fake H3.9D",
+        latest_tests_status=latest.get("tests_status"),
+        latest_smokes_status=latest.get("smokes_status"),
+        latest_runtime_health=fake.get("latest_runtime_health"),
+        latest_test_health=fake.get("latest_test_health"),
+        latest_risk=fake.get("latest_risk"),
+        latest_next_step=fake.get("latest_next_step"),
+        latest_open_debts=tuple(fake.get("latest_open_debts", [])),
+        latest_files_modified_count=latest.get("files_modified_count", 0),
+        latest_files_created_count=latest.get("files_created_count", 0),
+        latest_modules_touched=tuple(latest.get("modules_touched", [])),
+        latest_contracts_affected=tuple(latest.get("contracts_affected", [])),
+        latest_known_good=fake.get("latest_known_good"),
+        latest_known_weakness=fake.get("latest_known_weakness"),
+        latest_version_closed_for_scope=fake.get("latest_version_closed_for_scope"),
+        latest_review_artifacts_needed=tuple(fake.get("latest_review_artifacts_needed", [])),
+        latest_fallback_patterns=tuple(runtime_patterns.get("fallback_patterns", [])),
+        latest_degradation_patterns=tuple(runtime_patterns.get("degradation_patterns", [])),
+        latest_critic_patterns=tuple(runtime_patterns.get("critic_patterns", [])),
+        latest_router_patterns=tuple(runtime_patterns.get("router_patterns", [])),
+        latest_long_tail_failures=tuple(fake.get("known_issues", {}).get("latest_long_tail_failures", [])),
+        latest_rn_recent_outcomes=tuple(entry.get("rn_recent_outcomes", [])),
+        latest_rn_recommendations=tuple(entry.get("rn_recommendations", [])),
+        latest_rn_attention_points=tuple(entry.get("rn_attention_points", [])),
+        latest_production_models=tuple(model_bank.get("production_models", [])),
+        latest_candidate_models=tuple(model_bank.get("candidate_models", [])),
+        latest_lab_models=tuple(model_bank.get("lab_models", [])),
+        latest_do_not_promote_notes=tuple(model_bank.get("do_not_promote_notes", [])),
+    )
+
+
 @contextmanager
 def _codex_registry_mocks():
-    """Context manager que mockea AMBOS caminos de side effect del registry real."""
+    """Context manager que mockea TODOS los caminos de side effect del registry real."""
     fake = _build_fake_codex_registry()
+    fake_status = build_codex_control_status_from_fake_for_tests()
+    fake_status_summary = "Codex registry fake: completed V0.39.6, health watch, risk medium"
+    fake_checkpoint_summary = "checkpoint fake H3.9D"
     patches = [
+        # Originales
         patch("agents.system_state_agent.load_codex_control_registry", return_value=fake),
         patch("backend.app.routing_neuron.control.registry.load_codex_control_registry", return_value=fake),
+        # Nuevos — build_codex_control_status (usando side_effect con helper)
+        patch("backend.app.routing_neuron.admin.repertoire.build_codex_control_status", side_effect=lambda *args, **kwargs: build_codex_control_status_from_fake_for_tests()),
+        patch("backend.app.routing_neuron.control.registry.build_codex_control_status", side_effect=lambda *args, **kwargs: build_codex_control_status_from_fake_for_tests()),
+        # Nuevos — summarize_codex_control_status
+        patch("agents.system_state_agent.summarize_codex_control_status", return_value=fake_status_summary),
+        patch("backend.app.routing_neuron.control.registry.summarize_codex_control_status", return_value=fake_status_summary),
+        # Nuevos — summarize_codex_latest_checkpoint
+        patch("agents.system_state_agent.summarize_codex_latest_checkpoint", return_value=fake_checkpoint_summary),
+        patch("backend.app.routing_neuron.control.registry.summarize_codex_latest_checkpoint", return_value=fake_checkpoint_summary),
     ]
     for p in patches:
         p.start()
