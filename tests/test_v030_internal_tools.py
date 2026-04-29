@@ -4011,71 +4011,72 @@ class AuraV036CoreTest(unittest.TestCase):
         )
 
     def test_checkpoint_and_state_reflect_low_sample_runtime_after_applied_turn(self) -> None:
-        candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_explain:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3"),
-            failure_history=(),
-            expected_gain=0.2,
-            estimated_cost=0.25,
-            estimated_latency=90.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        self.assertIsNotNone(candidate)
-        registry = build_empty_routing_neuron_registry().register_candidate(candidate)
-        registry = registry.activate_candidate(candidate.neuron_id)
-        set_default_routing_registry(registry)
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            stack = self._prepare_multistack_runtime(
-                root,
-                granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
-                critic_output="VERIFICADA: sin conflicto claro.",
+        with _codex_registry_mocks():
+            candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_explain:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3"),
+                failure_history=(),
+                expected_gain=0.2,
+                estimated_cost=0.25,
+                estimated_latency=90.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
             )
-            execution = execute_model_response(
-                conversation=[
-                    {
-                        "role": "user",
-                        "content": "explicame una api con auth, rollback y riesgo en produccion",
-                    }
-                ],
+            self.assertIsNotNone(candidate)
+            registry = build_empty_routing_neuron_registry().register_candidate(candidate)
+            registry = registry.activate_candidate(candidate.neuron_id)
+            set_default_routing_registry(registry)
+
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                stack = self._prepare_multistack_runtime(
+                    root,
+                    granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
+                    critic_output="VERIFICADA: sin conflicto claro.",
+                )
+                execution = execute_model_response(
+                    conversation=[
+                        {
+                            "role": "user",
+                            "content": "explicame una api con auth, rollback y riesgo en produccion",
+                        }
+                    ],
+                    memory={"name": "Ada"},
+                    llama_path=stack["llama"],
+                    model_path=stack["primary"],
+                    behavior_plan=BehaviorPlan(intent="technical_explain"),
+                    route_action=ROUTE_MODEL,
+                    critic_llama_path=stack["llama"],
+                    critic_model_path=stack["critic"],
+                    router_llama_path=stack["llama"],
+                    router_model_path=stack["router"],
+                    fallback_llama_path=stack["llama"],
+                    fallback_model_path=stack["fallback"],
+                    session_id="session-low-sample-state",
+                )
+
+            self.assertEqual(execution.routing_neuron_decision, ROUTING_RUNTIME_APPLIED)
+            runtime_registry = get_default_routing_registry()
+
+            state_result = self._run_turn(
+                "que estado tienes",
                 memory={"name": "Ada"},
-                llama_path=stack["llama"],
-                model_path=stack["primary"],
-                behavior_plan=BehaviorPlan(intent="technical_explain"),
-                route_action=ROUTE_MODEL,
-                critic_llama_path=stack["llama"],
-                critic_model_path=stack["critic"],
-                router_llama_path=stack["llama"],
-                router_model_path=stack["router"],
-                fallback_llama_path=stack["llama"],
-                fallback_model_path=stack["fallback"],
-                session_id="session-low-sample-state",
+                routing_registry=runtime_registry,
+            )
+            checkpoint_result = self._run_turn(
+                "checkpoint routing neuron",
+                memory={"name": "Ada"},
+                routing_registry=runtime_registry,
             )
 
-        self.assertEqual(execution.routing_neuron_decision, ROUTING_RUNTIME_APPLIED)
-        runtime_registry = get_default_routing_registry()
-
-        state_result = self._run_turn(
-            "que estado tienes",
-            memory={"name": "Ada"},
-            routing_registry=runtime_registry,
-        )
-        checkpoint_result = self._run_turn(
-            "checkpoint routing neuron",
-            memory={"name": "Ada"},
-            routing_registry=runtime_registry,
-        )
-
-        self.assertIn("actividad aplicada observada con muestra baja", state_result.response)
-        self.assertIn("ventana runtime 1/", state_result.response)
-        self.assertIn("influyó 1", state_result.response)
-        self.assertIn("actividad aplicada observada con muestra baja", checkpoint_result.response)
-        self.assertIn("decisiones recientes applied", checkpoint_result.response)
+            self.assertIn("actividad aplicada observada con muestra baja", state_result.response)
+            self.assertIn("ventana runtime 1/", state_result.response)
+            self.assertIn("influyó 1", state_result.response)
+            self.assertIn("actividad aplicada observada con muestra baja", checkpoint_result.response)
+            self.assertIn("decisiones recientes applied", checkpoint_result.response)
 
     def test_live_applied_turn_is_visible_across_state_checkpoint_and_recent_activity(self) -> None:
         candidate = register_routing_neuron_candidate(
