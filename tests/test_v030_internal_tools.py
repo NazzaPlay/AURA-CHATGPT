@@ -3940,23 +3940,24 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertIn("critic", result.response.casefold())
 
     def test_system_state_is_honest_when_routing_neuron_has_no_runtime_history(self) -> None:
-        empty_registry = build_empty_routing_neuron_registry()
+        with _codex_registry_mocks():
+            empty_registry = build_empty_routing_neuron_registry()
 
-        state_result = self._run_turn(
-            "que estado tienes",
-            memory={"name": "Ada"},
-            routing_registry=empty_registry,
-        )
-        activity_result = self._run_turn(
-            "muestra actividad reciente de routing neuron",
-            memory={"name": "Ada"},
-            routing_registry=empty_registry,
-        )
-        checkpoint_result = self._run_turn(
-            "checkpoint routing neuron",
-            memory={"name": "Ada"},
-            routing_registry=empty_registry,
-        )
+            state_result = self._run_turn(
+                "que estado tienes",
+                memory={"name": "Ada"},
+                routing_registry=empty_registry,
+            )
+            activity_result = self._run_turn(
+                "muestra actividad reciente de routing neuron",
+                memory={"name": "Ada"},
+                routing_registry=empty_registry,
+            )
+            checkpoint_result = self._run_turn(
+                "checkpoint routing neuron",
+                memory={"name": "Ada"},
+                routing_registry=empty_registry,
+            )
 
         self.assertIn("runtime preparado, todavía sin historial reciente", state_result.response)
         self.assertIn("validación operativa en progreso", state_result.response)
@@ -3967,48 +3968,50 @@ class AuraV036CoreTest(unittest.TestCase):
         self.assertIn("sin historial runtime reciente todavía", checkpoint_result.response)
 
     def test_system_state_can_show_recent_routing_neuron_activity(self) -> None:
-        results = self._run_turn_sequence(
-            [
-                "explicame una api",
-                "explicame una api",
-                "que estado tienes",
-            ],
-            memory={"name": "Ada"},
-            runtime_script=self._build_dual_provider_runtime_script(),
-        )
-        state_result = results[-1]
-        self.assertEqual(state_result.metadata.route, "system_state")
-        self.assertIn("Routing Neuron V1", state_result.response)
-        self.assertIn("reciente", state_result.response)
-        self.assertTrue(
-            "candidate" in state_result.response
-            or "active" in state_result.response
-            or "observed_pattern" in state_result.response
-        )
+        with _codex_registry_mocks():
+            results = self._run_turn_sequence(
+                [
+                    "explicame una api",
+                    "explicame una api",
+                    "que estado tienes",
+                ],
+                memory={"name": "Ada"},
+                runtime_script=self._build_dual_provider_runtime_script(),
+            )
+            state_result = results[-1]
+            self.assertEqual(state_result.metadata.route, "system_state")
+            self.assertIn("Routing Neuron V1", state_result.response)
+            self.assertIn("reciente", state_result.response)
+            self.assertTrue(
+                "candidate" in state_result.response
+                or "active" in state_result.response
+                or "observed_pattern" in state_result.response
+            )
 
     def test_system_state_surfaces_weak_runtime_signal_after_degraded_turn(self) -> None:
-        results = self._run_turn_sequence(
-            [
-                "hola aura",
-                "que estado tienes",
-                "muestra actividad reciente de routing neuron",
-            ],
-            memory={"name": "Ada"},
-            model_available=False,
-        )
+        with _codex_registry_mocks():
+            results = self._run_turn_sequence(
+                [
+                    "hola aura",
+                    "que estado tienes",
+                    "muestra actividad reciente de routing neuron",
+                ],
+                memory={"name": "Ada"},
+                model_available=False,
+            )
 
-        state_result = results[1]
-        activity_result = results[2]
+            state_result = results[1]
+            activity_result = results[2]
 
-        self.assertIn("Routing Neuron V1", state_result.response)
-        self.assertIn("señal débil observada", state_result.response)
-        self.assertIn("ventana runtime 1/", state_result.response)
-        self.assertIn("fallback 1", state_result.response)
-        self.assertIn("Actividad reciente de Routing Neuron V1", activity_result.response)
-        self.assertTrue(
-            "no_signal" in activity_result.response
-            or "fallback_no_provider" in activity_result.response
-        )
+            self.assertIn("Routing Neuron V1", state_result.response)
+            self.assertIn("señal débil observada", state_result.response)
+            self.assertIn("ventana runtime 1/", state_result.response)
+            self.assertIn("fallback 1", state_result.response)
+            self.assertIn("Actividad reciente de Routing Neuron V1", activity_result.response)
+            self.assertTrue(
+                "no_signal" in activity_result.response
+                or "fallback_no_provider" in activity_result.response
+            )
 
     def test_checkpoint_and_state_reflect_low_sample_runtime_after_applied_turn(self) -> None:
         with _codex_registry_mocks():
@@ -4079,261 +4082,264 @@ class AuraV036CoreTest(unittest.TestCase):
             self.assertIn("decisiones recientes applied", checkpoint_result.response)
 
     def test_live_applied_turn_is_visible_across_state_checkpoint_and_recent_activity(self) -> None:
-        candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_explain:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3"),
-            failure_history=(),
-            expected_gain=0.2,
-            estimated_cost=0.25,
-            estimated_latency=90.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        self.assertIsNotNone(candidate)
-        registry = build_empty_routing_neuron_registry().register_candidate(candidate)
-        registry = registry.activate_candidate(candidate.neuron_id)
-        set_default_routing_registry(registry)
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            stack = self._prepare_multistack_runtime(
-                root,
-                granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
-                critic_output="VERIFICADA: sin conflicto claro.",
+        with _codex_registry_mocks():
+            candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_explain:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3"),
+                failure_history=(),
+                expected_gain=0.2,
+                estimated_cost=0.25,
+                estimated_latency=90.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
             )
-            memory = {"name": "Ada"}
-            memory_file = root / "memory.json"
-            memory_file.write_text(
-                json.dumps(memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            log_file = root / "session_20260401_010000.json"
-            conversation: list[dict] = []
-            results = []
-
-            for query in (
-                "explicame una api con auth, rollback y riesgo en produccion",
-                "que estado tienes",
-                "checkpoint routing neuron",
-                "muestra actividad reciente de routing neuron",
-            ):
-                turn_plan = prepare_turn(
-                    query,
-                    conversation=conversation,
-                    memory=memory,
-                )
-                self.assertIsNotNone(turn_plan)
-                result = execute_turn(
-                    turn_plan,
-                    conversation=conversation,
-                    memory=memory,
-                    memory_file=str(memory_file),
-                    log_file=str(log_file),
-                    llama_path=stack["llama"],
-                    model_path=stack["primary"],
-                    aura_version=AURA_VERSION,
-                )
-                results.append(result)
-
-        model_result, state_result, checkpoint_result, activity_result = results
-
-        self.assertTrue(model_result.metadata.routing_neuron_applied)
-        self.assertEqual(model_result.metadata.routing_neuron_decision_path, ROUTING_RUNTIME_PATH_SELECTED_AND_APPLIED)
-        self.assertEqual(model_result.metadata.routing_neuron_influence, "skip_critic")
-        self.assertIn("actividad aplicada observada con muestra baja", state_result.response)
-        self.assertIn("influyó 1", state_result.response)
-        self.assertIn("applied recientes skip_critic:improved", state_result.response)
-        self.assertIn("decisiones recientes applied", checkpoint_result.response)
-        self.assertIn("skip_critic:improved", checkpoint_result.response)
-        self.assertIn("Actividad reciente de Routing Neuron V1", activity_result.response)
-        self.assertIn("selected_and_applied", activity_result.response)
-        self.assertIn("skip_critic", activity_result.response)
-
-    def test_verified_runtime_can_bootstrap_visible_skip_critic_without_manual_seed(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            stack = self._prepare_multistack_runtime(
-                root,
-                granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
-                critic_output="VERIFICADA: sin conflicto claro.",
-            )
-            memory = {"name": "Ada"}
-            memory_file = root / "memory.json"
-            memory_file.write_text(
-                json.dumps(memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            log_file = root / "session_20260402_010000.json"
-            conversation: list[dict] = []
-            results = []
-
-            for query in (
-                "explicame una api con auth, rollback y riesgo en produccion",
-                "explicame una api con auth, rollback y riesgo en produccion",
-                "explicame una api con auth, rollback y riesgo en produccion",
-                "explicame una api con auth, rollback y riesgo en produccion",
-                "que estado tienes",
-                "checkpoint routing neuron",
-                "muestra actividad reciente de routing neuron",
-            ):
-                turn_plan = prepare_turn(
-                    query,
-                    conversation=conversation,
-                    memory=memory,
-                )
-                self.assertIsNotNone(turn_plan)
-                result = execute_turn(
-                    turn_plan,
-                    conversation=conversation,
-                    memory=memory,
-                    memory_file=str(memory_file),
-                    log_file=str(log_file),
-                    llama_path=stack["llama"],
-                    model_path=stack["primary"],
-                    aura_version=AURA_VERSION,
-                )
-                results.append(result)
-
-        first_result, second_result, third_result, fourth_result, state_result, checkpoint_result, activity_result = results
-
-        self.assertFalse(first_result.metadata.routing_neuron_applied)
-        self.assertFalse(second_result.metadata.routing_neuron_applied)
-        self.assertTrue(third_result.metadata.routing_neuron_applied)
-        self.assertEqual(third_result.metadata.routing_neuron_influence, "skip_critic")
-        self.assertEqual(
-            third_result.metadata.routing_neuron_decision_path,
-            ROUTING_RUNTIME_PATH_SELECTED_AND_APPLIED,
-        )
-        self.assertTrue(fourth_result.metadata.routing_neuron_applied)
-        self.assertEqual(fourth_result.metadata.routing_neuron_influence, "skip_critic")
-        self.assertEqual(
-            fourth_result.metadata.routing_neuron_decision_path,
-            ROUTING_RUNTIME_PATH_SELECTED_AND_APPLIED,
-        )
-        self.assertNotIn("routing_neuron", " ".join(fourth_result.metadata.provider_trace))
-
-        runtime_registry = get_default_routing_registry()
-        self.assertTrue(
-            any(
-                candidate.neuron_state == ROUTING_STATE_ACTIVE
-                and "skip_critic" in candidate.routing_condition
-                for candidate in runtime_registry.candidates.values()
-            )
-        )
-        self.assertIn("actividad aplicada observada con muestra baja", state_result.response)
-        self.assertIn("skip_critic:improved", checkpoint_result.response)
-        self.assertIn("selected_and_applied", activity_result.response)
-        self.assertIn("skip_critic", activity_result.response)
-
-    def test_system_state_recovers_visible_routing_trace_from_last_session_log(self) -> None:
-        candidate = register_routing_neuron_candidate(
-            task_signature="technical_reasoning:technical_explain:model",
-            activated_components=("primary", "critic"),
-            activation_rule="prefer_primary_only_when_low_risk",
-            routing_condition="prefer_primary_only skip_critic low",
-            intermediate_transform=None,
-            success_history=("ok-1", "ok-2", "ok-3"),
-            failure_history=(),
-            expected_gain=0.2,
-            estimated_cost=0.25,
-            estimated_latency=90.0,
-            neuron_type=ROUTING_TYPE_CONTROL,
-        )
-        self.assertIsNotNone(candidate)
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            root = Path(tmpdir)
-            stack = self._prepare_multistack_runtime(
-                root,
-                granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
-                critic_output="VERIFICADA: sin conflicto claro.",
-            )
+            self.assertIsNotNone(candidate)
             registry = build_empty_routing_neuron_registry().register_candidate(candidate)
             registry = registry.activate_candidate(candidate.neuron_id)
             set_default_routing_registry(registry)
 
-            memory = {"name": "Ada"}
-            memory_file = root / "memory.json"
-            memory_file.write_text(
-                json.dumps(memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            prior_log_file = root / "session_20260401_010000.json"
-            conversation: list[dict] = []
-
-            first_plan = prepare_turn(
-                "explicame una api con auth, rollback y riesgo en produccion",
-                conversation=conversation,
-                memory=memory,
-            )
-            self.assertIsNotNone(first_plan)
-            first_result = execute_turn(
-                first_plan,
-                conversation=conversation,
-                memory=memory,
-                memory_file=str(memory_file),
-                log_file=str(prior_log_file),
-                llama_path=stack["llama"],
-                model_path=stack["primary"],
-                aura_version=AURA_VERSION,
-            )
-            self.assertTrue(first_result.metadata.routing_neuron_applied)
-            prior_log_file.write_text(
-                json.dumps(conversation, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-
-            reset_default_routing_registry()
-            fresh_memory = {"name": "Ada"}
-            fresh_memory_file = root / "memory_fresh.json"
-            fresh_memory_file.write_text(
-                json.dumps(fresh_memory, ensure_ascii=False),
-                encoding="utf-8",
-            )
-            fresh_conversation: list[dict] = []
-            fresh_log_file = root / "session_20260401_020000.json"
-            recovered_results = []
-
-            for query in (
-                "que estado tienes",
-                "checkpoint routing neuron",
-                "muestra actividad reciente de routing neuron",
-            ):
-                turn_plan = prepare_turn(
-                    query,
-                    conversation=fresh_conversation,
-                    memory=fresh_memory,
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                stack = self._prepare_multistack_runtime(
+                    root,
+                    granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
+                    critic_output="VERIFICADA: sin conflicto claro.",
                 )
-                self.assertIsNotNone(turn_plan)
-                result = execute_turn(
-                    turn_plan,
-                    conversation=fresh_conversation,
-                    memory=fresh_memory,
-                    memory_file=str(fresh_memory_file),
-                    log_file=str(fresh_log_file),
+                memory = {"name": "Ada"}
+                memory_file = root / "memory.json"
+                memory_file.write_text(
+                    json.dumps(memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                log_file = root / "session_20260401_010000.json"
+                conversation: list[dict] = []
+                results = []
+
+                for query in (
+                    "explicame una api con auth, rollback y riesgo en produccion",
+                    "que estado tienes",
+                    "checkpoint routing neuron",
+                    "muestra actividad reciente de routing neuron",
+                ):
+                    turn_plan = prepare_turn(
+                        query,
+                        conversation=conversation,
+                        memory=memory,
+                    )
+                    self.assertIsNotNone(turn_plan)
+                    result = execute_turn(
+                        turn_plan,
+                        conversation=conversation,
+                        memory=memory,
+                        memory_file=str(memory_file),
+                        log_file=str(log_file),
+                        llama_path=stack["llama"],
+                        model_path=stack["primary"],
+                        aura_version=AURA_VERSION,
+                    )
+                    results.append(result)
+
+            model_result, state_result, checkpoint_result, activity_result = results
+
+            self.assertTrue(model_result.metadata.routing_neuron_applied)
+            self.assertEqual(model_result.metadata.routing_neuron_decision_path, ROUTING_RUNTIME_PATH_SELECTED_AND_APPLIED)
+            self.assertEqual(model_result.metadata.routing_neuron_influence, "skip_critic")
+            self.assertIn("actividad aplicada observada con muestra baja", state_result.response)
+            self.assertIn("influyó 1", state_result.response)
+            self.assertIn("applied recientes skip_critic:improved", state_result.response)
+            self.assertIn("decisiones recientes applied", checkpoint_result.response)
+            self.assertIn("skip_critic:improved", checkpoint_result.response)
+            self.assertIn("Actividad reciente de Routing Neuron V1", activity_result.response)
+            self.assertIn("selected_and_applied", activity_result.response)
+            self.assertIn("skip_critic", activity_result.response)
+
+    def test_verified_runtime_can_bootstrap_visible_skip_critic_without_manual_seed(self) -> None:
+        with _codex_registry_mocks():
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                stack = self._prepare_multistack_runtime(
+                    root,
+                    granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
+                    critic_output="VERIFICADA: sin conflicto claro.",
+                )
+                memory = {"name": "Ada"}
+                memory_file = root / "memory.json"
+                memory_file.write_text(
+                    json.dumps(memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                log_file = root / "session_20260402_010000.json"
+                conversation: list[dict] = []
+                results = []
+
+                for query in (
+                    "explicame una api con auth, rollback y riesgo en produccion",
+                    "explicame una api con auth, rollback y riesgo en produccion",
+                    "explicame una api con auth, rollback y riesgo en produccion",
+                    "explicame una api con auth, rollback y riesgo en produccion",
+                    "que estado tienes",
+                    "checkpoint routing neuron",
+                    "muestra actividad reciente de routing neuron",
+                ):
+                    turn_plan = prepare_turn(
+                        query,
+                        conversation=conversation,
+                        memory=memory,
+                    )
+                    self.assertIsNotNone(turn_plan)
+                    result = execute_turn(
+                        turn_plan,
+                        conversation=conversation,
+                        memory=memory,
+                        memory_file=str(memory_file),
+                        log_file=str(log_file),
+                        llama_path=stack["llama"],
+                        model_path=stack["primary"],
+                        aura_version=AURA_VERSION,
+                    )
+                    results.append(result)
+
+            first_result, second_result, third_result, fourth_result, state_result, checkpoint_result, activity_result = results
+
+            self.assertFalse(first_result.metadata.routing_neuron_applied)
+            self.assertFalse(second_result.metadata.routing_neuron_applied)
+            self.assertTrue(third_result.metadata.routing_neuron_applied)
+            self.assertEqual(third_result.metadata.routing_neuron_influence, "skip_critic")
+            self.assertEqual(
+                third_result.metadata.routing_neuron_decision_path,
+                ROUTING_RUNTIME_PATH_SELECTED_AND_APPLIED,
+            )
+            self.assertTrue(fourth_result.metadata.routing_neuron_applied)
+            self.assertEqual(fourth_result.metadata.routing_neuron_influence, "skip_critic")
+            self.assertEqual(
+                fourth_result.metadata.routing_neuron_decision_path,
+                ROUTING_RUNTIME_PATH_SELECTED_AND_APPLIED,
+            )
+            self.assertNotIn("routing_neuron", " ".join(fourth_result.metadata.provider_trace))
+
+            runtime_registry = get_default_routing_registry()
+            self.assertTrue(
+                any(
+                    candidate.neuron_state == ROUTING_STATE_ACTIVE
+                    and "skip_critic" in candidate.routing_condition
+                    for candidate in runtime_registry.candidates.values()
+                )
+            )
+            self.assertIn("actividad aplicada observada con muestra baja", state_result.response)
+            self.assertIn("skip_critic:improved", checkpoint_result.response)
+            self.assertIn("selected_and_applied", activity_result.response)
+            self.assertIn("skip_critic", activity_result.response)
+
+    def test_system_state_recovers_visible_routing_trace_from_last_session_log(self) -> None:
+        with _codex_registry_mocks():
+            candidate = register_routing_neuron_candidate(
+                task_signature="technical_reasoning:technical_explain:model",
+                activated_components=("primary", "critic"),
+                activation_rule="prefer_primary_only_when_low_risk",
+                routing_condition="prefer_primary_only skip_critic low",
+                intermediate_transform=None,
+                success_history=("ok-1", "ok-2", "ok-3"),
+                failure_history=(),
+                expected_gain=0.2,
+                estimated_cost=0.25,
+                estimated_latency=90.0,
+                neuron_type=ROUTING_TYPE_CONTROL,
+            )
+            self.assertIsNotNone(candidate)
+
+            with tempfile.TemporaryDirectory() as tmpdir:
+                root = Path(tmpdir)
+                stack = self._prepare_multistack_runtime(
+                    root,
+                    granite_output="Idea breve: usa auth estable y rollback probado antes de producción.",
+                    critic_output="VERIFICADA: sin conflicto claro.",
+                )
+                registry = build_empty_routing_neuron_registry().register_candidate(candidate)
+                registry = registry.activate_candidate(candidate.neuron_id)
+                set_default_routing_registry(registry)
+
+                memory = {"name": "Ada"}
+                memory_file = root / "memory.json"
+                memory_file.write_text(
+                    json.dumps(memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                prior_log_file = root / "session_20260401_010000.json"
+                conversation: list[dict] = []
+
+                first_plan = prepare_turn(
+                    "explicame una api con auth, rollback y riesgo en produccion",
+                    conversation=conversation,
+                    memory=memory,
+                )
+                self.assertIsNotNone(first_plan)
+                first_result = execute_turn(
+                    first_plan,
+                    conversation=conversation,
+                    memory=memory,
+                    memory_file=str(memory_file),
+                    log_file=str(prior_log_file),
                     llama_path=stack["llama"],
                     model_path=stack["primary"],
                     aura_version=AURA_VERSION,
                 )
-                recovered_results.append(result)
+                self.assertTrue(first_result.metadata.routing_neuron_applied)
+                prior_log_file.write_text(
+                    json.dumps(conversation, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
 
-        state_result, checkpoint_result, activity_result = recovered_results
+                reset_default_routing_registry()
+                fresh_memory = {"name": "Ada"}
+                fresh_memory_file = root / "memory_fresh.json"
+                fresh_memory_file.write_text(
+                    json.dumps(fresh_memory, ensure_ascii=False),
+                    encoding="utf-8",
+                )
+                fresh_conversation: list[dict] = []
+                fresh_log_file = root / "session_20260401_020000.json"
+                recovered_results = []
 
-        self.assertIn("sin historial runtime en memoria", state_result.response)
-        self.assertIn("actividad aplicada visible con muestra baja recuperada de la última sesión registrada", state_result.response)
-        self.assertIn("última sesión registrada", state_result.response)
-        self.assertIn("influyó 1", state_result.response)
-        self.assertIn("selected_and_applied", state_result.response)
-        self.assertIn("sin historial runtime en memoria", checkpoint_result.response)
-        self.assertIn("última sesión registrada", checkpoint_result.response)
-        self.assertIn("skip_critic", checkpoint_result.response)
-        self.assertIn("sin historial runtime en memoria", activity_result.response)
-        self.assertIn("replay visible desde la última sesión registrada", activity_result.response)
-        self.assertIn("selected_and_applied", activity_result.response)
-        self.assertIn("skip_critic", activity_result.response)
+                for query in (
+                    "que estado tienes",
+                    "checkpoint routing neuron",
+                    "muestra actividad reciente de routing neuron",
+                ):
+                    turn_plan = prepare_turn(
+                        query,
+                        conversation=fresh_conversation,
+                        memory=fresh_memory,
+                    )
+                    self.assertIsNotNone(turn_plan)
+                    result = execute_turn(
+                        turn_plan,
+                        conversation=fresh_conversation,
+                        memory=fresh_memory,
+                        memory_file=str(fresh_memory_file),
+                        log_file=str(fresh_log_file),
+                        llama_path=stack["llama"],
+                        model_path=stack["primary"],
+                        aura_version=AURA_VERSION,
+                    )
+                    recovered_results.append(result)
+
+            state_result, checkpoint_result, activity_result = recovered_results
+
+            self.assertIn("sin historial runtime en memoria", state_result.response)
+            self.assertIn("actividad aplicada visible con muestra baja recuperada de la última sesión registrada", state_result.response)
+            self.assertIn("última sesión registrada", state_result.response)
+            self.assertIn("influyó 1", state_result.response)
+            self.assertIn("selected_and_applied", state_result.response)
+            self.assertIn("sin historial runtime en memoria", checkpoint_result.response)
+            self.assertIn("última sesión registrada", checkpoint_result.response)
+            self.assertIn("skip_critic", checkpoint_result.response)
+            self.assertIn("sin historial runtime en memoria", activity_result.response)
+            self.assertIn("replay visible desde la última sesión registrada", activity_result.response)
+            self.assertIn("selected_and_applied", activity_result.response)
+            self.assertIn("skip_critic", activity_result.response)
 
     def test_recent_activity_from_session_log_explains_considered_without_candidate_match(self) -> None:
         with _codex_registry_mocks():
