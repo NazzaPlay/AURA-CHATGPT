@@ -585,14 +585,24 @@ def normalize_codex_control_registry(value: dict[str, Any] | None) -> dict[str, 
 
 
 def load_codex_control_registry(path: str | Path | None = None) -> dict[str, Any]:
+    """Lee el JSON y devuelve registry normalizado en memoria. NO escribe en disco."""
+    registry_path = _registry_path(path)
+    if not registry_path.exists():
+        return build_empty_codex_control_registry()
+    try:
+        raw = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return build_empty_codex_control_registry()
+    return normalize_codex_control_registry(raw)
+
+
+def repair_codex_control_registry(path: str | Path | None = None) -> dict[str, Any]:
+    """Asegura/crea archivo, carga raw, normaliza, guarda si cambió, devuelve normalized."""
     registry_path = ensure_codex_control_registry(path)
     try:
         raw = json.loads(registry_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError):
         raw = build_empty_codex_control_registry()
-        save_codex_control_registry(raw, path=registry_path)
-        return raw
-
     normalized = normalize_codex_control_registry(raw)
     if normalized != raw:
         save_codex_control_registry(normalized, path=registry_path)
@@ -738,6 +748,7 @@ __all__ = [
     "load_codex_control_registry",
     "normalize_codex_control_entry",
     "normalize_codex_control_registry",
+    "repair_codex_control_registry",
     "save_codex_control_registry",
     "summarize_codex_control_status",
     "summarize_codex_latest_checkpoint",
