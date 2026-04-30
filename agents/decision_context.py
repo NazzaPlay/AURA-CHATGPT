@@ -131,6 +131,10 @@ def _is_internal_command(normalized_input: str) -> bool:
         r"(ejecutar|corre|correr|inicia)\s+(un\s+)?(diagnostico|diagnóstico|chequeo|revisión)",
         r"(cual es|cuál es|decime|dime|dame)\s+(el\s+)?(estado|versión|version)",
         r"^(dame|mostrame|muestra)\s+(el\s+)?(estado|versión|version)\s+(del\s+)?(sistema|sistema)",
+        # Patrones para strategic y micro-plan queries
+        r"^(armame|ordename|ordéname)\s+",
+        r"^si\s+(quiero|estuvieras|estuviera)\s+",
+        r"^en\s+que\s+(deberiamos|deberíamos|conviene)\s+",
     ]
     
     for pattern in command_patterns:
